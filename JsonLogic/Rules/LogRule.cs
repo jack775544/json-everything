@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -37,6 +38,11 @@ public class LogRule : Rule
 		Console.WriteLine(log);
 
 		return log;
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		throw new NotImplementedException("Log method not implemented");
 	}
 }
 

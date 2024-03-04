@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -42,6 +43,11 @@ public class NotRule : Rule
 		var value = Value.Apply(data, contextData);
 
 		return !value.IsTruthy();
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		return Expression.Not(Value.CreateExpression(parameter).IsTruthy());
 	}
 }
 

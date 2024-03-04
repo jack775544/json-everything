@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -56,6 +57,21 @@ public class AddRule : Rule
 		}
 
 		return result;
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		var items = EvaluateItems(Items, parameter)
+			.Select(ExpressionExtensions.Numberify)
+			.Select(x => x.Type == typeof(object) ? Expression.Constant(0M) : x)
+			.ToList();
+
+		return items.Count switch
+		{
+			0 => Expression.Constant(0M),
+			1 => items[0],
+			_ => items.Aggregate(Expression.AddChecked),
+		};
 	}
 }
 

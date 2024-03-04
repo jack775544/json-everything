@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -51,6 +52,12 @@ public class AndRule : Rule
 		}
 
 		return first;
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		return EvaluateItems(Items, parameter)
+			.Aggregate((Expression)Expression.Constant(true), Expression.AndAlso);
 	}
 }
 

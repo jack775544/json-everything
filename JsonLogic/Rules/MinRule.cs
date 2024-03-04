@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -50,6 +52,16 @@ public class MinRule : Rule
 
 		return items.Min(i => i.Value!.Value);
 	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		return EvaluateItems(Items, parameter)
+			.Select(ExpressionExtensions.Numberify)
+			.Aggregate((a, c) => Expression.Call(_minMethod, a, c));
+	}
+
+	private static readonly MethodInfo _minMethod = ((Func<decimal, decimal, decimal>)Math.Min).Method;
+
 }
 
 internal class MinRuleJsonConverter : WeaklyTypedJsonConverter<MinRule>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -46,6 +47,11 @@ public class StrictNotEqualsRule : Rule
 	public override JsonNode? Apply(JsonNode? data, JsonNode? contextData = null)
 	{
 		return !A.Apply(data, contextData).IsEquivalentTo(B.Apply(data, contextData));
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		return Expression.NotEqual(A.CreateExpression(parameter), B.CreateExpression(parameter));
 	}
 }
 

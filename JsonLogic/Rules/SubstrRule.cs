@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -86,6 +88,18 @@ public class SubstrRule : Rule
 
 		return input.Substring(numberStart, integerCount);
 	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		var str = Input.CreateExpression(parameter).Stringify();
+		var start = Expression.Convert(Start.CreateExpression(parameter), typeof(int));
+		return Count == null
+			? Expression.Call(str, _substringMethod, start)
+			: Expression.Call(str, _substring2Method, start, Expression.Convert(Count.CreateExpression(parameter), typeof(int)));
+	}
+
+	private static readonly MethodInfo _substringMethod = typeof(string).GetMethod("Substring", [typeof(int)])!;
+	private static readonly MethodInfo _substring2Method = typeof(string).GetMethod("Substring", [typeof(int), typeof(int)])!;
 }
 
 internal class SubstrRuleJsonConverter : WeaklyTypedJsonConverter<SubstrRule>

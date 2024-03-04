@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -65,6 +66,27 @@ public class SubtractRule : Rule
 		}
 
 		return result;
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		if (Items.Count == 0)
+		{
+			throw new InvalidOperationException("Subtract must have arguments");
+		}
+
+		if (Items.Count == 1)
+		{
+			return Items[0].CreateExpression(parameter);
+		}
+
+		var current = Items[0].CreateExpression(parameter);
+		for (var i = 1; i < Items.Count; i++)
+		{
+			current = Expression.SubtractChecked(current, Items[i].CreateExpression(parameter).Numberify());
+		}
+
+		return current;
 	}
 }
 

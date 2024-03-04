@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -109,6 +110,23 @@ public class LessThanEqualRule : Rule
 
 		return string.Compare(stringA, stringB, StringComparison.Ordinal) <= 0 &&
 		       string.Compare(stringB, stringC, StringComparison.Ordinal) <= 0;
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		var zero = Expression.Constant(0M);
+		var a = A.CreateExpression(parameter).Numberify(zero);
+		var b = B.CreateExpression(parameter).Numberify(zero);
+
+		if (C == null)
+		{
+			return Expression.LessThanOrEqual(a, b);
+		}
+
+		var c = C.CreateExpression(parameter).Numberify(zero);
+		return Expression.AndAlso(
+			Expression.LessThanOrEqual(a, b),
+			Expression.LessThanOrEqual(b, c));
 	}
 }
 

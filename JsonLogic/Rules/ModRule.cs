@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -56,6 +57,11 @@ public class ModRule : Rule
 		if (numberB == 0) return null;
 
 		return numberA.Value % numberB.Value;
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		return Expression.Modulo(A.CreateExpression(parameter), B.CreateExpression(parameter));
 	}
 }
 

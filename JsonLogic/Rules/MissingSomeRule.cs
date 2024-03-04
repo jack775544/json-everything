@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -81,6 +82,11 @@ public class MissingSomeRule : Rule
 			return missing.ToJsonArray();
 
 		return new JsonArray();
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		throw new NotImplementedException("Missing rule not implemented for expressions");
 	}
 }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -60,6 +61,11 @@ public class MissingRule : Rule
 			.Select(k => (JsonNode?)k.Path)
 			.ToJsonArray();
 
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		throw new NotImplementedException("Missing rule not implemented for expressions");
 	}
 }
 

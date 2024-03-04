@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -45,6 +47,58 @@ public class MergeRule : Rule
 
 		return items.ToJsonArray();
 	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		var items = EvaluateItems(Items, parameter).ToList();
+
+		var arrayItems = new List<Expression>(items.Count);
+		Type? genericType = null;
+		foreach (var item in items)
+		{
+			if (item.Type.TryGetGenericCollectionType(out var type))
+			{
+				genericType ??= type;
+
+				if (genericType != type)
+				{
+					throw new InvalidOperationException("Mismatched array types");
+				}
+				
+				arrayItems.Add(item);
+			}
+			else
+			{
+				genericType ??= item.Type;
+
+				if (genericType != item.Type)
+				{
+					throw new InvalidOperationException("Mismatched array types");
+				}
+
+				arrayItems.Add(Expression.NewArrayInit(item.Type, item));
+				
+			}
+		}
+
+		if (genericType == null)
+		{
+			return Expression.NewArrayInit(typeof(object));
+		}
+
+		var genericEnumerable = typeof(IEnumerable<>).MakeGenericType(genericType);
+		var param = Expression.Parameter(genericEnumerable, genericType.Name);
+
+		return Expression.Call(
+			_selectManyMethod.MakeGenericMethod(genericEnumerable, genericType),
+			Expression.NewArrayInit(genericEnumerable, arrayItems),
+			Expression.Lambda(param, param));
+	}
+	
+	private static readonly MethodInfo _selectManyMethod = typeof(Enumerable)
+		.GetMethods()
+		.Where(x => x.Name == nameof(Enumerable.SelectMany))
+		.Single(x => x.GetParameters().Last().ParameterType.GetGenericArguments().Length == 2);
 }
 
 internal class MergeRuleJsonConverter : WeaklyTypedJsonConverter<MergeRule>

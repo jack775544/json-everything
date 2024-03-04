@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -27,6 +29,14 @@ public abstract class Rule
 	/// </param>
 	/// <returns>The result of the rule.</returns>
 	public abstract JsonNode? Apply(JsonNode? data, JsonNode? contextData = null);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="parameter"></param>
+	/// <typeparam name="T"></typeparam>
+	/// <returns></returns>
+	public abstract Expression CreateExpression(Expression parameter);
 
 	/// <summary>
 	/// Casts a JSON value to a <see cref="LiteralRule"/>.
@@ -68,6 +78,17 @@ public abstract class Rule
 	/// </summary>
 	/// <param name="value">The value.</param>
 	public static implicit operator Rule(double value) => new LiteralRule(value);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="items"></param>
+	/// <param name="parameter"></param>
+	/// <returns></returns>
+	protected static IEnumerable<Expression> EvaluateItems(IEnumerable<Rule> items, Expression parameter)
+	{
+		return items.Select(x => x.CreateExpression(parameter));
+	}
 }
 
 /// <summary>

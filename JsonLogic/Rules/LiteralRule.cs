@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -35,6 +37,53 @@ public class LiteralRule : Rule
 	public override JsonNode? Apply(JsonNode? data, JsonNode? contextData = null)
 	{
 		return Value;
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		if (Value == null)
+		{
+			return Expression.Constant(null);
+		}
+
+		return JsonNodeToExpression(Value, parameter);
+	}
+
+	internal static Expression JsonNodeToExpression(JsonNode? node, Expression parameter)
+	{
+		if (node == null)
+		{
+			return Expression.Constant(null);
+		}
+
+		switch (node.GetValueKind())
+		{
+			case JsonValueKind.Undefined:
+				return Expression.Constant(null);
+			case JsonValueKind.Object:
+				throw new NotImplementedException("Object values not yet implemented");
+			case JsonValueKind.Array:
+				var values = node.AsArray().Select(x => JsonNodeToExpression(x!, parameter)).ToList();
+
+				if (values.Count == 0)
+				{
+					return Expression.NewArrayInit(typeof(object));
+				}
+
+				return Expression.NewArrayInit(values[0].Type, values);
+			case JsonValueKind.String:
+				return Expression.Constant(node.GetValue<string>());
+			case JsonValueKind.Number:
+				return Expression.Constant(node.Numberify());
+			case JsonValueKind.True:
+				return Expression.Constant(true);
+			case JsonValueKind.False:
+				return Expression.Constant(false);
+			case JsonValueKind.Null:
+				return Expression.Constant(null);
+			default:
+				throw new ArgumentOutOfRangeException();
+		}
 	}
 }
 

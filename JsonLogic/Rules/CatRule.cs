@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -55,6 +57,15 @@ public class CatRule : Rule
 
 		return result;
 	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		var items = EvaluateItems(Items, parameter)
+			.Select(ExpressionExtensions.Stringify);
+		return Expression.Call(_stringConcatMethod, Expression.NewArrayInit(typeof(string), items));
+	}
+
+	private static readonly MethodInfo _stringConcatMethod = ((Func<IEnumerable<string>, string>)string.Concat).Method;
 }
 
 internal class CatRuleJsonConverter : WeaklyTypedJsonConverter<CatRule>

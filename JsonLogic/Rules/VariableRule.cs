@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -54,6 +58,72 @@ public class VariableRule : Rule
 			return pathEval;
 
 		return DefaultValue?.Apply(data, contextData) ?? null;
+	}
+
+	/// <inheritdoc />
+	[RequiresUnreferencedCode("Required")]
+	public override Expression CreateExpression(Expression parameter)
+	{
+		if (Path == null)
+		{
+			return Expression.Constant(null);
+		}
+
+		var path = Path.Apply().Stringify();
+
+		if (path == null)
+		{
+			throw new InvalidOperationException("Variable path is null");
+		}
+
+		if (string.IsNullOrEmpty(path))
+		{
+			return parameter;
+		} 
+
+		var pathSegments = path.Split('.');
+
+		var property = GetPropertyOrField(parameter, pathSegments);
+
+		if (DefaultValue == null)
+		{
+			return property;
+		}
+
+		var defaultValue = DefaultValue.CreateExpression(parameter);
+		return Expression.Coalesce(
+			Expression.Convert(
+				property,
+				defaultValue.Type.IsValueType
+					? typeof(Nullable<>).MakeGenericType(defaultValue.Type)
+					: defaultValue.Type),
+			defaultValue);
+	}
+
+	[RequiresUnreferencedCode("Calls System.Linq.Expressions.Expression.PropertyOrField(Expression, String)")]
+	private static Expression GetPropertyOrField(Expression expression, string[] path)
+	{
+		return path.Aggregate(expression, GetPropertyOrArrayMember);
+	}
+
+	[RequiresUnreferencedCode("Calls System.Linq.Expressions.Expression.PropertyOrField(Expression, String)")]
+	private static Expression GetPropertyOrArrayMember(Expression expression, string path)
+	{
+		if (expression.Type.IsCollectionType())
+		{
+			return int.TryParse(path, out var index)
+				? expression.GetCollectionItem(index)
+				: Expression.Constant(null);
+		}
+
+		try
+		{
+			return Expression.PropertyOrField(expression, path);
+		}
+		catch (ArgumentException)
+		{
+			return Expression.Constant(null);
+		}
 	}
 }
 

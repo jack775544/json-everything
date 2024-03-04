@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -64,6 +66,19 @@ public class InRule : Rule
 
 		return false;
 	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		return Expression.Call(
+			Value.CreateExpression(parameter).Stringify(),
+			_containsMethod,
+			Test.CreateExpression(parameter).Stringify());
+	}
+
+	private static readonly MethodInfo _containsMethod = typeof(string)
+		.GetMethods()
+		.Where(x => x.Name == "Contains")
+		.Single(x => x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType == typeof(string));
 }
 
 internal class InRuleJsonConverter : WeaklyTypedJsonConverter<InRule>

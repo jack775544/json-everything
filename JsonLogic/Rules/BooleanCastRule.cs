@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -40,6 +41,11 @@ public class BooleanCastRule : Rule
 	public override JsonNode? Apply(JsonNode? data, JsonNode? contextData = null)
 	{
 		return Value.Apply(data, contextData).IsTruthy();
+	}
+
+	public override Expression CreateExpression(Expression parameter)
+	{
+		return Value.CreateExpression(parameter).IsTruthy();
 	}
 }
 
