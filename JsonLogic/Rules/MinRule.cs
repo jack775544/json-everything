@@ -53,9 +53,9 @@ public class MinRule : Rule
 		return items.Min(i => i.Value!.Value);
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return EvaluateItems(Items, parameter)
+		return ExpressionExtensions.EvaluateItems(Items, parameter, options)
 			.Select(ExpressionExtensions.Numberify)
 			.Aggregate((a, c) => Expression.Call(_minMethod, a, c));
 	}

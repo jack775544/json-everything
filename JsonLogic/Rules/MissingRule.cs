@@ -63,7 +63,7 @@ public class MissingRule : Rule
 
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		throw new NotImplementedException("Missing rule not implemented for expressions");
 	}

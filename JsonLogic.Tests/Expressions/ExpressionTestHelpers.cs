@@ -8,14 +8,14 @@ public class ExpressionTestHelpers
 	public static Expression<Func<object?, TReturn>> CreateRuleExpression<TReturn>(Rule rule)
 	{
 		var parameter = Expression.Parameter(typeof(object), "arg");
-		var expression = rule.CreateExpression(parameter);
+		var expression = rule.CreateExpression(parameter, new CreateExpressionOptions());
 		return Expression.Lambda<Func<object?, TReturn>>(expression, parameter);
 	}
 
 	public static Expression<Func<TParam, TReturn>> CreateRuleExpression<TParam, TReturn>(Rule rule)
 	{
 		var parameter = Expression.Parameter(typeof(TParam), "arg");
-		var expression = rule.CreateExpression(parameter);
+		var expression = rule.CreateExpression(parameter, new CreateExpressionOptions());
 		return Expression.Lambda<Func<TParam, TReturn>>(expression, parameter);
 	}
 }

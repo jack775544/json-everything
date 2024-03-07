@@ -58,14 +58,14 @@ public class AllRule : Rule
 				results.All(result => result.IsTruthy()));
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var input = Input.CreateExpression(parameter);
+		var input = Input.CreateExpression(parameter, options);
 		var paramType = input.Type.IsArray
 			? input.Type.GetElementType()!
 			: input.Type.GetGenericArguments()[0];
 		var param = Expression.Parameter(paramType, input.GetType().Name);
-		var rule = Rule.CreateExpression(param);
+		var rule = Rule.CreateExpression(param, options);
 		return Expression.Call(
 			_allMethod.MakeGenericMethod(paramType),
 			input,

@@ -59,9 +59,9 @@ public class MultiplyRule : Rule
 		return result;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var items = EvaluateItems(Items, parameter).Select(ExpressionExtensions.Numberify).ToList();
+		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options).Select(ExpressionExtensions.Numberify).ToList();
 		return items.Count == 1 ? items[0] : items.Aggregate(Expression.MultiplyChecked);
 	}
 }

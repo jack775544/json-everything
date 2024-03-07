@@ -113,18 +113,18 @@ public class LessThanRule : Rule
 		       string.Compare(stringB, stringC, StringComparison.Ordinal) < 0;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		var zero = Expression.Constant(0M);
-		var a = A.CreateExpression(parameter).Numberify(zero);
-		var b = B.CreateExpression(parameter).Numberify(zero);
+		var a = A.CreateExpression(parameter, options).Numberify(zero);
+		var b = B.CreateExpression(parameter, options).Numberify(zero);
 
 		if (C == null)
 		{
 			return Expression.LessThan(a, b);
 		}
 
-		var c = C.CreateExpression(parameter).Numberify(zero);
+		var c = C.CreateExpression(parameter, options).Numberify(zero);
 		return Expression.AndAlso(
 			Expression.LessThan(a, b),
 			Expression.LessThan(b, c));

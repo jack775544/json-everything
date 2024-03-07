@@ -6,16 +6,19 @@ namespace Json.Logic.Tests.Expressions.EfCore;
 
 public class Department
 {
-	public int Id { get; set; }
+	public required int Id { get; set; }
 	public required string Name { get; set; }
-	public ICollection<Employee> Employees { get; set; }
+	public required ICollection<Employee> Employees { get; set; }
 }
 
 public class Employee
 {
-	public int Id { get; set; }
+	public required int Id { get; set; }
 	public required string Name { get; set; }
 	public required DateTime DateOfBirth { get; set; }
+	public required decimal Salary { get; set; }
+	public required double Height { get; set; }
+	public required int NumberOfChildren { get; set; }
 
 	public int DepartmentId { get; set; }
 	public Department? Department { get; set; }

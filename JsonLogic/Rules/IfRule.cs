@@ -85,9 +85,9 @@ public class IfRule : Rule
 	}
 
 	/// <inheritdoc />
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var components = EvaluateItems(Components, parameter).ToList();
+		var components = ExpressionExtensions.EvaluateItems(Components, parameter, options).ToList();
 		return CreateRuleRecursive(components);
 	}
 

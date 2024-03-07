@@ -89,13 +89,13 @@ public class SubstrRule : Rule
 		return input.Substring(numberStart, integerCount);
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var str = Input.CreateExpression(parameter).Stringify();
-		var start = Expression.Convert(Start.CreateExpression(parameter), typeof(int));
+		var str = Input.CreateExpression(parameter, options).Stringify();
+		var start = Expression.Convert(Start.CreateExpression(parameter, options), typeof(int));
 		return Count == null
 			? Expression.Call(str, _substringMethod, start)
-			: Expression.Call(str, _substring2Method, start, Expression.Convert(Count.CreateExpression(parameter), typeof(int)));
+			: Expression.Call(str, _substring2Method, start, Expression.Convert(Count.CreateExpression(parameter, options), typeof(int)));
 	}
 
 	private static readonly MethodInfo _substringMethod = typeof(string).GetMethod("Substring", [typeof(int)])!;

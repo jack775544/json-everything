@@ -161,7 +161,7 @@ internal static class ExpressionExtensions
 		genericType = type
 			.GetInterfaces()
 			.Where(x => x.IsGenericType)
-			.SingleOrDefault(x => x.GetGenericTypeDefinition() == typeof(IList<>))
+			.SingleOrDefault(x => x.GetGenericTypeDefinition() == typeof(IEnumerable<>))
 			?.GetGenericArguments()
 			.Single();
 
@@ -206,6 +206,32 @@ internal static class ExpressionExtensions
 		}
 
 		throw new InvalidOperationException($"Invalid collection type {expression.Type.Name}");
+	}
+
+	public static IEnumerable<Expression> EvaluateItems(IEnumerable<Rule> items, Expression parameter, CreateExpressionOptions options)
+	{
+		return items.Select(x => x.CreateExpression(parameter, options));
+	}
+
+	public static Expression CreateConstant<T>(T constant, CreateExpressionOptions options)
+	{
+		if (!options.WrapConstants)
+		{
+			return Expression.Constant(constant);
+		}
+
+		var data = new DataObject<T>
+		{
+			Field = constant
+		};
+
+		return Expression.PropertyOrField(Expression.Constant(data), nameof(DataObject<object>.Field));
+
+	}
+
+	private class DataObject<T>
+	{
+		public T? Field { get; set; }
 	}
 }
 

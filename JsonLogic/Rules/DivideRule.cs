@@ -59,9 +59,9 @@ public class DivideRule : Rule
 		return numberA.Value / numberB.Value;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.Divide(A.CreateExpression(parameter), B.CreateExpression(parameter));
+		return Expression.Divide(A.CreateExpression(parameter, options), B.CreateExpression(parameter, options));
 	}
 }
 

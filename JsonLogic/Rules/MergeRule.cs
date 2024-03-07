@@ -48,9 +48,9 @@ public class MergeRule : Rule
 		return items.ToJsonArray();
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var items = EvaluateItems(Items, parameter).ToList();
+		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options).ToList();
 
 		var arrayItems = new List<Expression>(items.Count);
 		Type? genericType = null;
@@ -64,7 +64,7 @@ public class MergeRule : Rule
 				{
 					throw new InvalidOperationException("Mismatched array types");
 				}
-				
+
 				arrayItems.Add(item);
 			}
 			else

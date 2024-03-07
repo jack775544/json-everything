@@ -60,9 +60,7 @@ public class VariableRule : Rule
 		return DefaultValue?.Apply(data, contextData) ?? null;
 	}
 
-	/// <inheritdoc />
-	[RequiresUnreferencedCode("Required")]
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		if (Path == null)
 		{
@@ -90,7 +88,7 @@ public class VariableRule : Rule
 			return property;
 		}
 
-		var defaultValue = DefaultValue.CreateExpression(parameter);
+		var defaultValue = DefaultValue.CreateExpression(parameter, options);
 		return Expression.Coalesce(
 			Expression.Convert(
 				property,

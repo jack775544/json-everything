@@ -67,12 +67,12 @@ public class InRule : Rule
 		return false;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		return Expression.Call(
-			Value.CreateExpression(parameter).Stringify(),
+			Value.CreateExpression(parameter, options).Stringify(),
 			_containsMethod,
-			Test.CreateExpression(parameter).Stringify());
+			Test.CreateExpression(parameter, options).Stringify());
 	}
 
 	private static readonly MethodInfo _containsMethod = typeof(string)

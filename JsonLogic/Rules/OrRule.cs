@@ -54,9 +54,9 @@ public class OrRule : Rule
 		return first;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return EvaluateItems(Items, parameter)
+		return ExpressionExtensions.EvaluateItems(Items, parameter, options)
 			.Aggregate((Expression)Expression.Constant(false), Expression.OrElse);
 	}
 }

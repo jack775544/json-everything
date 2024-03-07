@@ -84,7 +84,7 @@ public class MissingSomeRule : Rule
 		return new JsonArray();
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		throw new NotImplementedException("Missing rule not implemented for expressions");
 	}

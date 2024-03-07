@@ -76,14 +76,14 @@ public class ReduceRule : Rule
 		return accumulator;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var input = Input.CreateExpression(parameter);
-		var initial = Initial.CreateExpression(parameter);
+		var input = Input.CreateExpression(parameter, options);
+		var initial = Initial.CreateExpression(parameter, options);
 
 		if (!input.Type.TryGetGenericCollectionType(out var collectionType))
 		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
+			throw new JsonLogicException("Non collection passed when the expecting collection in reduce rule");
 		}
 
 		// The algorithm here is a little complex. The JsonLogic function is expecting a parameter object in the shape of
@@ -96,7 +96,7 @@ public class ReduceRule : Rule
 		var currentParam = Expression.Parameter(collectionType, "current");
 
 		var rule = PropertyReplacer.Replace(
-			Rule.CreateExpression(param),
+			Rule.CreateExpression(param, options),
 			new List<PropertyReplacerInfo>
 			{
 				new(stateType, stateType.GetMember(nameof(ReduceState<object, object>.Accumulator)).First(), accumulatorParam),
@@ -112,7 +112,7 @@ public class ReduceRule : Rule
 
 	private static readonly MethodInfo _aggregateMethod = typeof(Enumerable)
 		.GetMethods()
-		.Where(x => x.Name == "Aggregate")
+		.Where(x => x.Name == nameof(Enumerable.Aggregate))
 		.Single(x => x.GetParameters().Length == 3);
 
 	private class ReduceState<TSource, TAggregate>

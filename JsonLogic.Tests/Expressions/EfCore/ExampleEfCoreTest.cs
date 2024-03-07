@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Json.Logic.Rules;
 using Microsoft.Data.Sqlite;
@@ -27,8 +27,8 @@ public class ExampleEfCoreTest
 				Id = 1,
 				Name = "Reporting",
 				Employees = [
-					new Employee { Id = 1, Name = "Alice", DateOfBirth = new DateTime(1990, 1, 1) },
-					new Employee { Id = 2, Name = "Bob", DateOfBirth = new DateTime(1995, 5, 5) },
+					new Employee { Id = 1, Name = "Alice", DateOfBirth = new DateTime(1990, 1, 1), Height = 175.5, Salary = 10000m, NumberOfChildren = 1 },
+					new Employee { Id = 2, Name = "Bob", DateOfBirth = new DateTime(1995, 5, 5), Height = 170, Salary = 15000m, NumberOfChildren = 2 },
 				]
 			},
 			new Department
@@ -36,7 +36,7 @@ public class ExampleEfCoreTest
 				Id = 2,
 				Name = "Management",
 				Employees = [
-					new Employee { Id = 4, Name = "Jane", DateOfBirth = new DateTime(1994, 4, 4) },
+					new Employee { Id = 4, Name = "Jane", DateOfBirth = new DateTime(1994, 4, 4), Height = 165.6, Salary = 20000.50m, NumberOfChildren = 3 },
 				]
 			},
 			new Department
@@ -44,15 +44,22 @@ public class ExampleEfCoreTest
 				Id = 3,
 				Name = "HR",
 				Employees = [
-					new Employee { Id = 5, Name = "John", DateOfBirth = new DateTime(2002, 2, 2) },
-					new Employee { Id = 6, Name = "Alice", DateOfBirth = new DateTime(1996, 6, 6) },
-					new Employee { Id = 7, Name = "Tom", DateOfBirth = new DateTime(1997, 7, 7) },
+					new Employee { Id = 5, Name = "John", DateOfBirth = new DateTime(2002, 2, 2), Height = 160, Salary = 30000m, NumberOfChildren = 4 },
+					new Employee { Id = 6, Name = "Alice", DateOfBirth = new DateTime(1996, 6, 6), Height = 162.2, Salary = 350000m, NumberOfChildren = 5 },
+					new Employee { Id = 7, Name = "Tom", DateOfBirth = new DateTime(1997, 7, 7), Height = 190.1, Salary = 40000m, NumberOfChildren = 6 },
 				]
 			});
 
 		await dbContext.SaveChangesAsync();
 
-		var rule = new StrictEqualsRule("HR", new VariableRule("Name"));
+		// var rule = new StrictEqualsRule("HR", new VariableRule("Name"));
+		// var rule = new StrictEqualsRule(1, new VariableRule("Id"));
+		var rule = new StrictEqualsRule(
+			new ReduceRule(
+				new VariableRule("Employees"),
+				new AddRule(new VariableRule("current.NumberOfChildren"), new VariableRule("accumulator")),
+				0),
+			15);
 		var expression = ExpressionTestHelpers.CreateRuleExpression<Department, bool>(rule);
 
 		var departmentCount = await dbContext

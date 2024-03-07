@@ -58,9 +58,9 @@ public class CatRule : Rule
 		return result;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var items = EvaluateItems(Items, parameter)
+		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options)
 			.Select(ExpressionExtensions.Stringify);
 		return Expression.Call(_stringConcatMethod, Expression.NewArrayInit(typeof(string), items));
 	}

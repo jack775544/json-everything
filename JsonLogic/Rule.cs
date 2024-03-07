@@ -31,12 +31,12 @@ public abstract class Rule
 	public abstract JsonNode? Apply(JsonNode? data, JsonNode? contextData = null);
 
 	/// <summary>
-	/// 
+	/// Creates an expression predicate for the rule.
 	/// </summary>
-	/// <param name="parameter"></param>
-	/// <typeparam name="T"></typeparam>
-	/// <returns></returns>
-	public abstract Expression CreateExpression(Expression parameter);
+	/// <param name="parameter">An expression to be used as the JSON Logic data.</param>
+	/// <param name="options">Options for creating the expression.</param>
+	/// <returns>An expression body that represents the logic rule.</returns>
+	public abstract Expression CreateExpression(Expression parameter, CreateExpressionOptions options);
 
 	/// <summary>
 	/// Casts a JSON value to a <see cref="LiteralRule"/>.
@@ -78,17 +78,18 @@ public abstract class Rule
 	/// </summary>
 	/// <param name="value">The value.</param>
 	public static implicit operator Rule(double value) => new LiteralRule(value);
+}
 
+/// <summary>
+/// Options for the create expression logic method.
+/// </summary>
+public class CreateExpressionOptions
+{
 	/// <summary>
-	/// 
+	/// If set to true then constant values will be wrapped in an object and the value will be fetched from this wrapper object.
+	/// This causes EF Core to use SQL variables when generating SQL.
 	/// </summary>
-	/// <param name="items"></param>
-	/// <param name="parameter"></param>
-	/// <returns></returns>
-	protected static IEnumerable<Expression> EvaluateItems(IEnumerable<Rule> items, Expression parameter)
-	{
-		return items.Select(x => x.CreateExpression(parameter));
-	}
+	public bool WrapConstants { get; set; }
 }
 
 /// <summary>

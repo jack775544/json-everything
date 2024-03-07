@@ -45,9 +45,9 @@ public class NotRule : Rule
 		return !value.IsTruthy();
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.Not(Value.CreateExpression(parameter).IsTruthy());
+		return Expression.Not(Value.CreateExpression(parameter, options).IsTruthy());
 	}
 }
 

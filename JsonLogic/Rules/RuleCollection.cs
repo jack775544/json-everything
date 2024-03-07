@@ -38,10 +38,9 @@ public class RuleCollection : Rule
 		return Rules.Select(x => x.Apply(data, contextData)).ToJsonArray();
 	}
 
-	[RequiresDynamicCode("Required")]
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.NewArrayInit(typeof(object), EvaluateItems(Rules, parameter));
+		return Expression.NewArrayInit(typeof(object), ExpressionExtensions.EvaluateItems(Rules, parameter, options));
 	}
 }
 

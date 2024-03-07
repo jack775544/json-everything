@@ -39,31 +39,31 @@ public class LiteralRule : Rule
 		return Value;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		if (Value == null)
 		{
 			return Expression.Constant(null);
 		}
 
-		return JsonNodeToExpression(Value, parameter);
+		return JsonNodeToExpression(Value, parameter, options);
 	}
 
-	internal static Expression JsonNodeToExpression(JsonNode? node, Expression parameter)
+	internal static Expression JsonNodeToExpression(JsonNode? node, Expression parameter, CreateExpressionOptions options)
 	{
 		if (node == null)
 		{
-			return Expression.Constant(null);
+			return ExpressionExtensions.CreateConstant<object?>(null, options);
 		}
 
 		switch (node.GetValueKind())
 		{
 			case JsonValueKind.Undefined:
-				return Expression.Constant(null);
+				return ExpressionExtensions.CreateConstant<object?>(null, options);
 			case JsonValueKind.Object:
 				throw new NotImplementedException("Object values not yet implemented");
 			case JsonValueKind.Array:
-				var values = node.AsArray().Select(x => JsonNodeToExpression(x!, parameter)).ToList();
+				var values = node.AsArray().Select(x => JsonNodeToExpression(x!, parameter, options)).ToList();
 
 				if (values.Count == 0)
 				{
@@ -72,15 +72,15 @@ public class LiteralRule : Rule
 
 				return Expression.NewArrayInit(values[0].Type, values);
 			case JsonValueKind.String:
-				return Expression.Constant(node.GetValue<string>());
+				return ExpressionExtensions.CreateConstant(node.GetValue<string>(), options);
 			case JsonValueKind.Number:
-				return Expression.Constant(node.Numberify());
+				return ExpressionExtensions.CreateConstant(node.Numberify(), options);
 			case JsonValueKind.True:
-				return Expression.Constant(true);
+				return ExpressionExtensions.CreateConstant(true, options);
 			case JsonValueKind.False:
-				return Expression.Constant(false);
+				return ExpressionExtensions.CreateConstant(false, options);
 			case JsonValueKind.Null:
-				return Expression.Constant(null);
+				return ExpressionExtensions.CreateConstant<object?>(null, options);
 			default:
 				throw new ArgumentOutOfRangeException();
 		}

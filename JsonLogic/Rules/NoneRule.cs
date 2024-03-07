@@ -56,9 +56,9 @@ public class NoneRule : Rule
 			.Any(result => result.IsTruthy());
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var input = Input.CreateExpression(parameter);
+		var input = Input.CreateExpression(parameter, options);
 
 		if (!input.Type.TryGetGenericCollectionType(out var type))
 		{
@@ -66,7 +66,7 @@ public class NoneRule : Rule
 		}
 
 		var param = Expression.Parameter(type, type.Name);
-		var rule = Rule.CreateExpression(param);
+		var rule = Rule.CreateExpression(param, options);
 		return Expression.Not(Expression.Call(
 			_anyMethod.MakeGenericMethod(type),
 			input,

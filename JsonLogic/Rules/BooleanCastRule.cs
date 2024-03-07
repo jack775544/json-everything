@@ -43,9 +43,9 @@ public class BooleanCastRule : Rule
 		return Value.Apply(data, contextData).IsTruthy();
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Value.CreateExpression(parameter).IsTruthy();
+		return Value.CreateExpression(parameter, options).IsTruthy();
 	}
 }
 

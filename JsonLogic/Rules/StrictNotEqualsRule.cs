@@ -49,9 +49,9 @@ public class StrictNotEqualsRule : Rule
 		return !A.Apply(data, contextData).IsEquivalentTo(B.Apply(data, contextData));
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.NotEqual(A.CreateExpression(parameter), B.CreateExpression(parameter));
+		return Expression.NotEqual(A.CreateExpression(parameter, options), B.CreateExpression(parameter, options));
 	}
 }
 

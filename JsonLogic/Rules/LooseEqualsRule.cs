@@ -52,9 +52,9 @@ public class LooseEqualsRule : Rule
 		return a.LooseEquals(b);
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.Equal(A.CreateExpression(parameter), B.CreateExpression(parameter));
+		return Expression.Equal(A.CreateExpression(parameter, options), B.CreateExpression(parameter, options));
 	}
 }
 

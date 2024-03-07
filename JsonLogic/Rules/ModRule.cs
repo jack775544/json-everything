@@ -59,9 +59,9 @@ public class ModRule : Rule
 		return numberA.Value % numberB.Value;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.Modulo(A.CreateExpression(parameter), B.CreateExpression(parameter));
+		return Expression.Modulo(A.CreateExpression(parameter, options), B.CreateExpression(parameter, options));
 	}
 }
 

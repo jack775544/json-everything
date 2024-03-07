@@ -40,7 +40,7 @@ public class LogRule : Rule
 		return log;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		throw new NotImplementedException("Log method not implemented");
 	}

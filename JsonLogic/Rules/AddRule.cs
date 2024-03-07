@@ -59,9 +59,9 @@ public class AddRule : Rule
 		return result;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var items = EvaluateItems(Items, parameter)
+		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options)
 			.Select(ExpressionExtensions.Numberify)
 			.Select(x => x.Type == typeof(object) ? Expression.Constant(0M) : x)
 			.ToList();

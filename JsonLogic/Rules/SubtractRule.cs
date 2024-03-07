@@ -68,7 +68,7 @@ public class SubtractRule : Rule
 		return result;
 	}
 
-	public override Expression CreateExpression(Expression parameter)
+	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		if (Items.Count == 0)
 		{
@@ -77,13 +77,13 @@ public class SubtractRule : Rule
 
 		if (Items.Count == 1)
 		{
-			return Items[0].CreateExpression(parameter);
+			return Items[0].CreateExpression(parameter, options);
 		}
 
-		var current = Items[0].CreateExpression(parameter);
+		var current = Items[0].CreateExpression(parameter, options);
 		for (var i = 1; i < Items.Count; i++)
 		{
-			current = Expression.SubtractChecked(current, Items[i].CreateExpression(parameter).Numberify());
+			current = Expression.SubtractChecked(current, Items[i].CreateExpression(parameter, options).Numberify());
 		}
 
 		return current;
