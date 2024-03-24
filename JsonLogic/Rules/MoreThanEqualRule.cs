@@ -67,10 +67,10 @@ public class MoreThanEqualRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var zero = Expression.Constant(0M);
-		var a = A.CreateExpression(parameter, options).Numberify(zero);
-		var b = B.CreateExpression(parameter, options).Numberify(zero);
-		return Expression.GreaterThanOrEqual(a, b);
+		var a = A.CreateExpression(parameter, options).Numberify(0, options);
+		var b = B.CreateExpression(parameter, options).Numberify(0, options);
+		var args = new[] { a, b }.Downcast();
+		return Expression.GreaterThanOrEqual(args[0], args[1]);
 	}
 }
 

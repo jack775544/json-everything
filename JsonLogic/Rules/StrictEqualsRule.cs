@@ -51,7 +51,12 @@ public class StrictEqualsRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.Equal(A.CreateExpression(parameter, options), B.CreateExpression(parameter, options));
+		var args = new[]
+		{
+			A.CreateExpression(parameter, options),
+			B.CreateExpression(parameter, options)
+		}.Downcast();
+		return Expression.Equal(args[0], args[1]);
 	}
 }
 

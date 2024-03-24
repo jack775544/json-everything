@@ -61,6 +61,7 @@ public class CatRule : Rule
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options)
+			.Downcast(typeof(string))
 			.Select(ExpressionExtensions.Stringify);
 		return Expression.Call(_stringConcatMethod, Expression.NewArrayInit(typeof(string), items));
 	}

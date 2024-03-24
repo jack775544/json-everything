@@ -114,19 +114,21 @@ public class LessThanEqualRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var zero = Expression.Constant(0M);
-		var a = A.CreateExpression(parameter, options).Numberify(zero);
-		var b = B.CreateExpression(parameter, options).Numberify(zero);
+		var a = A.CreateExpression(parameter, options);
+		var b = B.CreateExpression(parameter, options);
 
 		if (C == null)
 		{
-			return Expression.LessThanOrEqual(a, b);
+			var args = new[] { a, b }.Downcast();
+			return Expression.LessThanOrEqual(args[0], args[1]);
 		}
 
-		var c = C.CreateExpression(parameter, options).Numberify(zero);
+		var c = C.CreateExpression(parameter, options);
+
+		var argsWithC = new[] { a, b, c }.Downcast();
 		return Expression.AndAlso(
-			Expression.LessThanOrEqual(a, b),
-			Expression.LessThanOrEqual(b, c));
+			Expression.LessThanOrEqual(argsWithC[0], argsWithC[1]),
+			Expression.LessThanOrEqual(argsWithC[1], argsWithC[2]));
 	}
 }
 

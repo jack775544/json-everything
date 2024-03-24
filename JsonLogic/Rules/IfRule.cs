@@ -88,7 +88,7 @@ public class IfRule : Rule
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		var components = ExpressionExtensions.EvaluateItems(Components, parameter, options).ToList();
-		return CreateRuleRecursive(components);
+		return new [] { CreateRuleRecursive(components) }.Downcast().First();
 	}
 
 	private static Expression CreateRuleRecursive(List<Expression> components)

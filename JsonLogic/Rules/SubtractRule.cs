@@ -83,7 +83,7 @@ public class SubtractRule : Rule
 		var current = Items[0].CreateExpression(parameter, options);
 		for (var i = 1; i < Items.Count; i++)
 		{
-			current = Expression.SubtractChecked(current, Items[i].CreateExpression(parameter, options).Numberify());
+			current = Expression.SubtractChecked(current, Items[i].CreateExpression(parameter, options).Numberify(options));
 		}
 
 		return current;

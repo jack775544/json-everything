@@ -14,16 +14,16 @@ public class AllTests
 
 		var expression = ExpressionTestHelpers.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
-		// JsonAssert.IsTrue(rule.Apply());
 	}
 
 	[Test]
 	public void AllDoNotMatchCondition()
 	{
-		var rule = new AllRule(JsonNode.Parse("[1,-2,3]"),
+		int[] data = [1, -2, 3];
+		var rule = new AllRule(new VariableRule(""),
 			new MoreThanRule(new VariableRule(""), 0));
 
-		var expression = ExpressionTestHelpers.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		var expression = ExpressionTestHelpers.CreateRuleExpression<int[], bool>(rule);
+		Assert.IsFalse(expression.Compile()(data));
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
@@ -90,6 +91,11 @@ public class CreateExpressionOptions
 	/// This causes EF Core to use SQL variables when generating SQL.
 	/// </summary>
 	public bool WrapConstants { get; set; }
+	
+	/// <summary>
+	/// Culture info for parse operations.
+	/// </summary>
+	public CultureInfo CultureInfo { get; set; } = CultureInfo.InvariantCulture;
 }
 
 /// <summary>

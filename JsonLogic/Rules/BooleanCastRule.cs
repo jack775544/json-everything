@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -45,7 +46,7 @@ public class BooleanCastRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Value.CreateExpression(parameter, options).IsTruthy();
+		return new [] { Value.CreateExpression(parameter, options) }.Downcast().First().IsTruthy();
 	}
 }
 

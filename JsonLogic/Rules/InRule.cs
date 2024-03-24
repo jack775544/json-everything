@@ -70,9 +70,9 @@ public class InRule : Rule
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		return Expression.Call(
-			Value.CreateExpression(parameter, options).Stringify(),
+			new [] { Value.CreateExpression(parameter, options) }.Downcast(typeof(string)).First().Stringify(),
 			_containsMethod,
-			Test.CreateExpression(parameter, options).Stringify());
+			new [] { Test.CreateExpression(parameter, options) }.Downcast(typeof(string)).First().Stringify());
 	}
 
 	private static readonly MethodInfo _containsMethod = typeof(string)

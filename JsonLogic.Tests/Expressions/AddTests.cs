@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
@@ -12,6 +13,16 @@ public class AddTests
 		var expression = ExpressionTestHelpers.CreateRuleExpression<decimal>(rule);
 
 		Assert.AreEqual(9, expression.Compile()(null));
+	}
+
+	[Test]
+	public void AddNumberAndStringReturnsSum()
+	{
+		var data = new KeyValuePair<int, int>(4, 2);
+		var rule = new AddRule(new VariableRule("Key"), "5");
+		var expression = ExpressionTestHelpers.CreateRuleExpression<KeyValuePair<int, int>, int>(rule);
+
+		Assert.AreEqual(9, expression.Compile()(data));
 	}
 
 	[Test]
@@ -36,7 +47,7 @@ public class AddTests
 	public void AddSingleTrueThrowsError()
 	{
 		var rule = new AddRule(true);
-		var expression = ExpressionTestHelpers.CreateRuleExpression<decimal>(rule);
+		var expression = ExpressionTestHelpers.CreateRuleExpression<object>(rule);
 
 		Assert.AreEqual(1, expression.Compile()(null));
 	}
@@ -45,7 +56,7 @@ public class AddTests
 	public void AddSingleFalseThrowsError()
 	{
 		var rule = new AddRule(false);
-		var expression = ExpressionTestHelpers.CreateRuleExpression<decimal>(rule);
+		var expression = ExpressionTestHelpers.CreateRuleExpression<object>(rule);
 
 		Assert.AreEqual(0, expression.Compile()(null));
 	}
@@ -54,7 +65,7 @@ public class AddTests
 	public void AddSingleNullReturns0()
 	{
 		var rule = new AddRule(LiteralRule.Null);
-		var expression = ExpressionTestHelpers.CreateRuleExpression<decimal>(rule);
+		var expression = ExpressionTestHelpers.CreateRuleExpression<int>(rule);
 
 		Assert.AreEqual(0, expression.Compile()(null));
 	}

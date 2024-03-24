@@ -79,7 +79,7 @@ public class ReduceRule : Rule
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		var input = Input.CreateExpression(parameter, options);
-		var initial = Initial.CreateExpression(parameter, options);
+		var initial = new [] { Initial.CreateExpression(parameter, options) }.Downcast().First();
 
 		if (!input.Type.TryGetGenericCollectionType(out var collectionType))
 		{

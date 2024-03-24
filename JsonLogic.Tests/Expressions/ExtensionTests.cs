@@ -19,7 +19,7 @@ public class ExtensionTests
 	public void Truthiness(string text, bool expected)
 	{
 		var json = JsonNode.Parse(text);
-		var expression = LiteralRule.JsonNodeToExpression(json, Expression.Constant(null), new CreateExpressionOptions());
+		var expression = LiteralRule.JsonNodeToExpression(json, Expression.Constant(null), new CreateExpressionOptions(), false);
 		var truthyFunc = Expression.Lambda<Func<bool>>(expression.IsTruthy());
 		Console.WriteLine(truthyFunc);
 

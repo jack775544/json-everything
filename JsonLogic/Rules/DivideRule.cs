@@ -61,7 +61,12 @@ public class DivideRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.Divide(A.CreateExpression(parameter, options), B.CreateExpression(parameter, options));
+		var args = new[]
+		{
+			A.CreateExpression(parameter, options),
+			B.CreateExpression(parameter, options)
+		}.Downcast();
+		return Expression.Divide(args[0], args[1]);
 	}
 }
 

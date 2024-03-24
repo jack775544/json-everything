@@ -61,7 +61,7 @@ public class MultiplyRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options).Select(ExpressionExtensions.Numberify).ToList();
+		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options).Select(x => x.Numberify(options)).ToList();
 		return items.Count == 1 ? items[0] : items.Aggregate(Expression.MultiplyChecked);
 	}
 }

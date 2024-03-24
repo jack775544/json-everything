@@ -61,10 +61,13 @@ public class AllRule : Rule
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		var input = Input.CreateExpression(parameter, options);
-		var paramType = input.Type.IsArray
-			? input.Type.GetElementType()!
-			: input.Type.GetGenericArguments()[0];
-		var param = Expression.Parameter(paramType, input.GetType().Name);
+
+		if (!input.Type.TryGetGenericCollectionType(out var paramType))
+		{
+			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
+		}
+
+		var param = Expression.Parameter(paramType, paramType.Name);
 		var rule = Rule.CreateExpression(param, options);
 		return Expression.Call(
 			_allMethod.MakeGenericMethod(paramType),
