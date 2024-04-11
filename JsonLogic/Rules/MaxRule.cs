@@ -58,6 +58,7 @@ public class MaxRule : Rule
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		return ExpressionExtensions.EvaluateItems(Items, parameter, options)
+			.Downcast()
 			.Select(x => x.Numberify(options))
 			.Aggregate((a, c) => Expression.Call(_maxMethod, a, c));
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
@@ -91,11 +92,14 @@ public class SubstrRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var str = Input.CreateExpression(parameter, options).Stringify();
-		var start = Expression.Convert(Start.CreateExpression(parameter, options), typeof(int));
-		return Count == null
+		var str = new [] { Input.CreateExpression(parameter, options) }.Downcast().First().Stringify();
+		var start = new[] { Start.CreateExpression(parameter, options) }.Downcast(typeof(int)).First();
+		var count = Count != null
+			? new[] { Count.CreateExpression(parameter, options) }.Downcast(typeof(int)).First()
+			: null;
+		return count == null
 			? Expression.Call(str, _substringMethod, start)
-			: Expression.Call(str, _substring2Method, start, Expression.Convert(Count.CreateExpression(parameter, options), typeof(int)));
+			: Expression.Call(str, _substring2Method, start, count);
 	}
 
 	private static readonly MethodInfo _substringMethod = typeof(string).GetMethod("Substring", [typeof(int)])!;

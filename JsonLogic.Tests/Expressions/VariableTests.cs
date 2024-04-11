@@ -7,7 +7,7 @@ namespace Json.Logic.Tests.Expressions;
 
 public class VariableTests
 {
-	private record VariableTestData(decimal Foo, decimal Bar);
+	private record VariableTestData(decimal Foo, decimal Bar, int? Nullable = null);
 
 	private record NestedTestData(string Baz, VariableTestData Inner);
 
@@ -44,11 +44,11 @@ public class VariableTests
 	[Test]
 	public void VariableWithInvalidPathAndDefaultReturnsDefault()
 	{
-		var rule = new VariableRule("baz", 11);
+		var rule = new VariableRule("nullable", 11);
 		var data = new VariableTestData(5, 10);
-		var expression = ExpressionTestHelpers.CreateRuleExpression<VariableTestData, decimal>(rule);
+		var expression = ExpressionTestHelpers.CreateRuleExpression<VariableTestData, int>(rule);
 
-		Assert.AreEqual(11M, expression.Compile()(data));
+		Assert.AreEqual(11, expression.Compile()(data));
 	}
 
 	[Test]
@@ -96,9 +96,9 @@ public class VariableTests
 	[Test]
 	public void VariableWithInvalidNestedPathAndDefaultReturnsDefault()
 	{
-		var rule = new VariableRule("inner.baz", 11M);
+		var rule = new VariableRule("inner.Nullable", 11);
 		var data = new NestedTestData("hello world", new VariableTestData(5, 10));
-		var expression = ExpressionTestHelpers.CreateRuleExpression<NestedTestData, decimal>(rule);
+		var expression = ExpressionTestHelpers.CreateRuleExpression<NestedTestData, int>(rule);
 
 		Assert.AreEqual(11M, expression.Compile()(data));
 	}

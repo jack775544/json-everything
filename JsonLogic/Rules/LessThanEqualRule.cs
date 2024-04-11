@@ -119,13 +119,13 @@ public class LessThanEqualRule : Rule
 
 		if (C == null)
 		{
-			var args = new[] { a, b }.Downcast();
+			var args = new[] { a, b }.DowncastNumber();
 			return Expression.LessThanOrEqual(args[0], args[1]);
 		}
 
-		var c = C.CreateExpression(parameter, options);
+		var c = C.CreateExpression(parameter, options).Numberify(options);
 
-		var argsWithC = new[] { a, b, c }.Downcast();
+		var argsWithC = new[] { a, b, c }.DowncastNumber();
 		return Expression.AndAlso(
 			Expression.LessThanOrEqual(argsWithC[0], argsWithC[1]),
 			Expression.LessThanOrEqual(argsWithC[1], argsWithC[2]));

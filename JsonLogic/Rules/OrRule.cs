@@ -57,6 +57,7 @@ public class OrRule : Rule
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		return ExpressionExtensions.EvaluateItems(Items, parameter, options)
+			.Downcast()
 			.Aggregate((Expression)Expression.Constant(false), Expression.OrElse);
 	}
 }

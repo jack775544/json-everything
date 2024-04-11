@@ -20,4 +20,20 @@ public class SubtractTests
 		var expression = ExpressionTestHelpers.CreateRuleExpression<decimal>(rule);
 		Assert.AreEqual(-1, expression.Compile()(null));
 	}
+
+	[Test]
+	public void SubtractSingleNumber()
+	{
+		var rule = new SubtractRule(4);
+		var expression = ExpressionTestHelpers.CreateRuleExpression<decimal>(rule);
+		Assert.AreEqual(-4, expression.Compile()(null));
+	}
+	
+	[Test]
+	public void SubtractThreeNumbers()
+	{
+		var rule = new SubtractRule(4, 3, 2);
+		var expression = ExpressionTestHelpers.CreateRuleExpression<decimal>(rule);
+		Assert.AreEqual(-1, expression.Compile()(null));
+	}
 }

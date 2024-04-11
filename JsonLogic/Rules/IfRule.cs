@@ -99,7 +99,7 @@ public class IfRule : Rule
 		}
 
 		return Expression.Condition(
-			components[0],
+			new [] { components[0] }.Downcast(typeof(bool)).First(),
 			components[1],
 			CreateRuleRecursive(components.Skip(2).ToList()));
 	}
@@ -107,9 +107,9 @@ public class IfRule : Rule
 	private static Expression CreateRuleExpression(List<Expression> components) => components.Count switch
 	{
 		0 => Expression.Constant(null),
-		1 => components[0],
-		2 => Expression.Condition(components[0], components[1], Expression.Constant(null)),
-		3 => Expression.Condition(components[0], components[1], components[2]),
+		1 => new [] { components[0] }.Downcast(typeof(bool)).First(),
+		2 => Expression.Condition(new [] { components[0] }.Downcast(typeof(bool)).First(), components[1], Expression.Constant(null)),
+		3 => Expression.Condition(new [] { components[0] }.Downcast(typeof(bool)).First(), components[1], components[2]),
 		_ => throw new InvalidOperationException("Invalid number of arguments for if statement, expected 0, 1, 2 or 3 parameters")
 	};
 }

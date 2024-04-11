@@ -115,18 +115,21 @@ public class LessThanRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var a = A.CreateExpression(parameter, options).Numberify(0, options);
-		var b = B.CreateExpression(parameter, options).Numberify(0, options);
+		var a = A.CreateExpression(parameter, options);
+		var b = B.CreateExpression(parameter, options);
 
 		if (C == null)
 		{
-			return Expression.LessThan(a, b);
+			var args = new[] { a, b }.DowncastNumber();
+			return Expression.LessThan(args[0], args[1]);
 		}
 
-		var c = C.CreateExpression(parameter, options).Numberify(0, options);
+		var c = C.CreateExpression(parameter, options).Numberify(options);
+
+		var argsWithC = new[] { a, b, c }.DowncastNumber();
 		return Expression.AndAlso(
-			Expression.LessThan(a, b),
-			Expression.LessThan(b, c));
+			Expression.LessThan(argsWithC[0], argsWithC[1]),
+			Expression.LessThan(argsWithC[1], argsWithC[2]));
 	}
 }
 

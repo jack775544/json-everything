@@ -16,7 +16,6 @@ public class StrictNotEqualsTests
 	[Test]
 	public void EqualsReturnsFalse()
 	{
-		1m.Equals(1);
 		var rule = new StrictNotEqualsRule(1, 1);
 		var expression = ExpressionTestHelpers.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));

@@ -83,19 +83,34 @@ public class VariableRule : Rule
 
 		var property = GetPropertyOrField(parameter, pathSegments);
 
-		if (DefaultValue == null)
+		if (DefaultValue != null)
 		{
-			return property;
+			if (
+				property.Type.IsGenericType && property.Type.GetGenericTypeDefinition() == typeof(Nullable<>)
+				|| !property.Type.IsValueType)
+			{
+				var defaultValue = DefaultValue.CreateExpression(parameter, options);
+				var args = new[]
+				{
+					property,
+					defaultValue
+				}.Downcast();
+
+				return Expression.Coalesce(args[0], args[1]);
+			}
 		}
 
-		var defaultValue = DefaultValue.CreateExpression(parameter, options);
-		return Expression.Coalesce(
-			Expression.Convert(
-				property,
-				defaultValue.Type.IsValueType
-					? typeof(Nullable<>).MakeGenericType(defaultValue.Type)
-					: defaultValue.Type),
-			defaultValue);
+		return property;
+
+		
+		
+		// return Expression.Coalesce(
+		// 	Expression.Convert(
+		// 		property,
+		// 		defaultValue.Type.IsValueType
+		// 			? typeof(Nullable<>).MakeGenericType(defaultValue.Type)
+		// 			: defaultValue.Type),
+		// 	defaultValue);
 	}
 
 	[RequiresUnreferencedCode("Calls System.Linq.Expressions.Expression.PropertyOrField(Expression, String)")]

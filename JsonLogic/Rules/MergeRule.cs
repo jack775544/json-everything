@@ -50,7 +50,7 @@ public class MergeRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options).ToList();
+		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options).Downcast().ToList();
 
 		var arrayItems = new List<Expression>(items.Count);
 		Type? genericType = null;

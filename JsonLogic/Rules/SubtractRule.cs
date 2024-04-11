@@ -70,23 +70,17 @@ public class SubtractRule : Rule
 
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
-		if (Items.Count == 0)
-		{
-			throw new InvalidOperationException("Subtract must have arguments");
-		}
+		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options)
+			.Downcast()
+			.Select(x => x.Numberify(0, options))
+			.ToList();
 
-		if (Items.Count == 1)
+		return items.Count switch
 		{
-			return Items[0].CreateExpression(parameter, options);
-		}
-
-		var current = Items[0].CreateExpression(parameter, options);
-		for (var i = 1; i < Items.Count; i++)
-		{
-			current = Expression.SubtractChecked(current, Items[i].CreateExpression(parameter, options).Numberify(options));
-		}
-
-		return current;
+			0 => ExpressionExtensions.CreateConstant(0, true, options),
+			1 => Expression.NegateChecked(items[0].Numberify(options)),
+			_ => items.Aggregate(Expression.SubtractChecked),
+		};
 	}
 }
 

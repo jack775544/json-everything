@@ -228,7 +228,7 @@ internal static class ExpressionExtensions
 
 	public static Expression CreateConstant<T>(T constant, bool createBox, CreateExpressionOptions options)
 	{
-		if (createBox && constant is string or decimal)
+		if (createBox && constant is string or decimal or bool)
 		{
 			return Expression.Constant(new DataObject(constant, options));
 		}
@@ -251,41 +251,67 @@ internal static class ExpressionExtensions
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 
-	private static Type GetDesiredType(List<Expression> expressions)
+	public static List<Expression> DowncastNumber(this IEnumerable<Expression> expressions)
 	{
-		// If something is explicitly declaring its type, then use it.
-		var desiredType = expressions.Select(x => x.Type).FirstOrDefault(x => x != typeof(DataObject));
-		if (desiredType != null)
-		{
-			return desiredType;
-		}
+		var expressionList = expressions.ToList();
+		var types = GetDataObjectTypes(expressionList);
+		// var mostCommonType = types.MaxByCustom(x => _numberTypeHierarchy.IndexOf(x)) ?? typeof(decimal);
+		var mostCommonType = types.Any(x => _numberTypeHierarchy.Contains(x))
+			? types.MaxByCustom(x => _numberTypeHierarchy.IndexOf(x)) ?? typeof(decimal)
+			: typeof(decimal);
+		var visitor = new DataObjectReplacer(mostCommonType, new DataObject(0, new CreateExpressionOptions { WrapConstants = false }));
+		return expressionList.Select(x => visitor.Visit(x)).ToList();
+	}
 
+	public static List<Type> GetDataObjectTypes(IEnumerable<Expression> expressions)
+	{
 		var inspector = new DataObjectTypeInspector();
+
 		foreach (var expression in expressions)
 		{
 			inspector.Visit(expression);
 		}
 
+		return inspector.DiscoveredTypes.ToList();
+	}
+
+	private static Type GetDesiredType(List<Expression> expressions)
+	{
+		// If something is explicitly declaring its type, then use it.
+		var desiredType = expressions.Select(x => x.Type).FirstOrDefault(x => x != typeof(DataObject));
+		if (desiredType != null && desiredType != typeof(object))
+		{
+			return desiredType;
+		}
+
+		var discoveredTypes = GetDataObjectTypes(expressions);
+
 		// If the type needs to be inferred, then convert to the most common type
 		// The most common type will be the one that has the lowest value in the type hierarchy
-		var mostCommonType = inspector.DiscoveredTypes.MinByCustom(x => _typeHierarchy.IndexOf(x)) ?? typeof(string);
+		var mostCommonType = discoveredTypes.MaxByCustom(x => _typeHierarchy.IndexOf(x)) ?? typeof(string);
 		return mostCommonType;
 	}
 
-	// List of types from the most general to the least general
-	private static readonly List<Type> _typeHierarchy = [
-		typeof(string),
-		typeof(Guid),
-		typeof(DateTime),
-		typeof(DateOnly),
-		typeof(TimeOnly),
-		typeof(decimal),
-		typeof(double),
-		typeof(float),
-		typeof(int),
-		typeof(long),
-		typeof(short),
+	private static readonly List<Type> _numberTypeHierarchy =
+	[
 		typeof(byte),
+		typeof(short),
+		typeof(long),
+		typeof(int),
+		typeof(float),
+		typeof(double),
+		typeof(decimal),
+	];
+
+	// List of types from the most general to the least general
+	private static readonly List<Type> _typeHierarchy =
+	[
+		.._numberTypeHierarchy,
+		typeof(TimeOnly),
+		typeof(DateOnly),
+		typeof(DateTime),
+		typeof(Guid),
+		typeof(string),
 	];
 
 	internal static TSource? MinByCustom<TSource, TKey>(this IEnumerable<TSource> self, Func<TSource, TKey> keySelector)
@@ -315,9 +341,51 @@ internal static class ExpressionExtensions
 
 		return minItem;
 	}
+	
+	internal static TSource? MaxByCustom<TSource, TKey>(this IEnumerable<TSource> self, Func<TSource, TKey> keySelector)
+	{
+		var maxKey = default(TKey);
+		var maxItem = default(TSource);
+		var first = true;
+		var comparer = Comparer<TKey>.Default;
+
+		foreach (var item in self)
+		{
+			var key = keySelector(item);
+
+			if (first)
+			{
+				first = false;
+				maxKey = key;
+				maxItem = item;
+			}
+
+			if (comparer.Compare(key, maxKey) > 0)
+			{
+				maxKey = key;
+				maxItem = item;
+			}
+		}
+
+		return maxItem;
+	}
 
 	public static Expression DataObjectToExpression(DataObject dataObject, Type convertTo)
 	{
+		var isArray = false;
+		if (convertTo != typeof(string) && TryGetGenericCollectionType(convertTo, out var collectionType))
+		{
+			isArray = true;
+			convertTo = collectionType;
+		}
+
+		var isNullable = false;
+		if (convertTo.IsGenericType && convertTo.GetGenericTypeDefinition() == typeof(Nullable<>))
+		{
+			convertTo = convertTo.GetGenericArguments()[0];
+			isNullable = true;
+		}
+
 		var result = DataObjectConverters.TryGetValue(convertTo, out var converter)
 			? converter(dataObject)
 			: throw new InvalidOperationException($"Could not find converter to convert {dataObject.Field} to {convertTo.FullName}");
@@ -327,7 +395,9 @@ internal static class ExpressionExtensions
 			throw new InvalidOperationException($"Could not convert {dataObject.Field} to {convertTo.FullName}");
 		}
 
-		return result;
+		return isArray
+			? Expression.NewArrayInit(convertTo, result)
+			: result;
 	}
 
 	public static readonly Dictionary<Type, Func<DataObject, Expression?>> DataObjectConverters = new()
@@ -337,6 +407,7 @@ internal static class ExpressionExtensions
 		{ typeof(DateTime), static data => data.AsDateTime() },
 		{ typeof(DateOnly), static data => data.AsDateOnly() },
 		{ typeof(TimeOnly), static data => data.AsTimeOnly() },
+		{ typeof(bool), static data => data.AsBool() },
 		{ typeof(int), static data => data.AsInt() },
 		{ typeof(long), static data => data.AsLong() },
 		{ typeof(short), static data => data.AsShort() },
@@ -351,20 +422,33 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 {
 	public object? Field { get; set; } = constant;
 
-	public Expression? AsString()
+	public Expression? AsString() => Field switch
 	{
-		if (Field is string stringField)
-		{
-			return ExpressionExtensions.CreateConstant(stringField, false, options);
-		}
+		string field => ExpressionExtensions.CreateConstant(field, false, options),
+		int field => ExpressionExtensions.CreateConstant(field.ToString(options.CultureInfo), false, options),
+		long field => ExpressionExtensions.CreateConstant(field.ToString(options.CultureInfo), false, options),
+		short field => ExpressionExtensions.CreateConstant(field.ToString(options.CultureInfo), false, options),
+		byte field => ExpressionExtensions.CreateConstant(field.ToString(options.CultureInfo), false, options),
+		double field => ExpressionExtensions.CreateConstant(field.ToString(options.CultureInfo), false, options),
+		float field => ExpressionExtensions.CreateConstant(field.ToString(options.CultureInfo), false, options),
+		decimal field => ExpressionExtensions.CreateConstant(field.ToString(options.CultureInfo), false, options),
+		bool field => ExpressionExtensions.CreateConstant(field ? "true" : "false", false, options),
+		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(int).FullName}")
+	};
 
-		if (Field is decimal numberField)
-		{
-			return ExpressionExtensions.CreateConstant(numberField.ToString(options.CultureInfo), false, options);
-		}
-
-		return null;
-	}
+	public Expression? AsBool() => Field switch
+	{
+		string field => ExpressionExtensions.CreateConstant(!string.IsNullOrEmpty(field), false, options),
+		int field => ExpressionExtensions.CreateConstant(field != 0, false, options),
+		long field => ExpressionExtensions.CreateConstant(field != 0, false, options),
+		short field => ExpressionExtensions.CreateConstant(field != 0, false, options),
+		byte field => ExpressionExtensions.CreateConstant(field != 0, false, options),
+		double field => ExpressionExtensions.CreateConstant(field != 0, false, options),
+		float field => ExpressionExtensions.CreateConstant(field != 0, false, options),
+		decimal field => ExpressionExtensions.CreateConstant(field != 0, false, options),
+		bool field => ExpressionExtensions.CreateConstant(field, false, options),
+		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(int).FullName}")
+	};
 
 	public Expression? AsGuid()
 	{
@@ -392,6 +476,7 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 		double => AsNumber<double, int>(Convert.ToInt32, int.TryParse),
 		float => AsNumber<float, int>(Convert.ToInt32, int.TryParse),
 		decimal => AsNumber<decimal, int>(Convert.ToInt32, int.TryParse),
+		bool field => ExpressionExtensions.CreateConstant(field ? 1 : 0, false, options),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(int).FullName}")
 	};
 
@@ -405,6 +490,7 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 		double => AsNumber<double, long>(Convert.ToInt64, long.TryParse),
 		float => AsNumber<float, long>(Convert.ToInt64, long.TryParse),
 		decimal => AsNumber<decimal, long>(Convert.ToInt64, long.TryParse),
+		bool field => ExpressionExtensions.CreateConstant(field ? 1L : 0L, false, options),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(long).FullName}")
 	};
 
@@ -418,6 +504,7 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 		double => AsNumber<double, short>(Convert.ToInt16, short.TryParse),
 		float => AsNumber<float, short>(Convert.ToInt16, short.TryParse),
 		decimal => AsNumber<decimal, short>(Convert.ToInt16, short.TryParse),
+		bool field => ExpressionExtensions.CreateConstant(field ? (short)1 : (short)0, false, options),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(short).FullName}")
 	};
 
@@ -431,6 +518,7 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 		double => AsNumber<double, byte>(Convert.ToByte, byte.TryParse),
 		float => AsNumber<float, byte>(Convert.ToByte, byte.TryParse),
 		decimal => AsNumber<decimal, byte>(Convert.ToByte, byte.TryParse),
+		bool field => ExpressionExtensions.CreateConstant(field ? (byte)1 : (byte)0, false, options),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(byte).FullName}")
 	};
 	public Expression? AsDouble() =>  Field switch
@@ -443,6 +531,7 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 		double => AsNumber<double, double>(Convert.ToDouble, double.TryParse),
 		float => AsNumber<float, double>(Convert.ToDouble, double.TryParse),
 		decimal => AsNumber<decimal, double>(Convert.ToDouble, double.TryParse),
+		bool field => ExpressionExtensions.CreateConstant(field ? 1d : 0d, false, options),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(double).FullName}")
 	};
 	public Expression? AsFloat() =>  Field switch
@@ -455,6 +544,7 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 		double => AsNumber<double, float>(Convert.ToSingle, float.TryParse),
 		float => AsNumber<float, float>(Convert.ToSingle, float.TryParse),
 		decimal => AsNumber<decimal, float>(Convert.ToSingle, float.TryParse),
+		bool field => ExpressionExtensions.CreateConstant(field ? 1f : 0f, false, options),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(float).FullName}")
 	};
 	public Expression? AsDecimal() =>  Field switch
@@ -467,6 +557,7 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 		double => AsNumber<double, decimal>(Convert.ToDecimal, decimal.TryParse),
 		float => AsNumber<float, decimal>(Convert.ToDecimal, decimal.TryParse),
 		decimal => AsNumber<decimal, decimal>(Convert.ToDecimal, decimal.TryParse),
+		bool field => ExpressionExtensions.CreateConstant(field ? 1m : 0m, false, options),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(decimal).FullName}")
 	};
 
@@ -502,10 +593,15 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 	}
 }
 
-internal class DataObjectReplacer(Type? desiredType) : ExpressionVisitor
+internal class DataObjectReplacer(Type? desiredType, DataObject? nullCast = null) : ExpressionVisitor
 {
 	protected override Expression VisitConstant(ConstantExpression node)
 	{
+		if (node.Value == null)
+		{
+			node = Expression.Constant(nullCast);
+		}
+
 		// All data objects will be found in constants
 		if (node.Type != typeof(DataObject))
 		{

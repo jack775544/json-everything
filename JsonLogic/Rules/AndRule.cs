@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
@@ -57,6 +56,7 @@ public class AndRule : Rule
 	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
 	{
 		return ExpressionExtensions.EvaluateItems(Items, parameter, options)
+			.Downcast(typeof(bool))
 			.Aggregate((Expression)Expression.Constant(true), Expression.AndAlso);
 	}
 }
