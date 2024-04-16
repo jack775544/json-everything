@@ -120,13 +120,13 @@ public class LessThanRule : Rule
 
 		if (C == null)
 		{
-			var args = new[] { a, b }.DowncastNumber();
+			var args = new[] { a, b }.Downcast();
 			return Expression.LessThan(args[0], args[1]);
 		}
 
 		var c = C.CreateExpression(parameter, options).Numberify(options);
 
-		var argsWithC = new[] { a, b, c }.DowncastNumber();
+		var argsWithC = new[] { a, b, c }.Downcast();
 		return Expression.AndAlso(
 			Expression.LessThan(argsWithC[0], argsWithC[1]),
 			Expression.LessThan(argsWithC[1], argsWithC[2]));
