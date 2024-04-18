@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -57,25 +54,6 @@ public class AllRule : Rule
 		return (results.Count != 0 &&
 				results.All(result => result.IsTruthy()));
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var input = Input.CreateExpression(parameter, options);
-
-		if (!input.Type.TryGetGenericCollectionType(out var paramType))
-		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
-		}
-
-		var param = Expression.Parameter(paramType, paramType.Name);
-		var rule = Rule.CreateExpression(param, options);
-		return Expression.Call(
-			_allMethod.MakeGenericMethod(paramType),
-			input,
-			Expression.Lambda(rule, param));
-	}
-
-	private static readonly MethodInfo _allMethod = typeof(Enumerable).GetMethod("All")!;
 }
 
 internal class AllRuleJsonConverter : WeaklyTypedJsonConverter<AllRule>

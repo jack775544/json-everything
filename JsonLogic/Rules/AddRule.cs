@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -57,21 +55,6 @@ public class AddRule : Rule
 		}
 
 		return result;
-	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options)
-			.Downcast()
-			.Select(x => x.Numberify(0, options))
-			.ToList();
-
-		return items.Count switch
-		{
-			0 => ExpressionExtensions.CreateConstant(0, true, options),
-			1 => items[0].Numberify(options),
-			_ => items.Aggregate(Expression.AddChecked),
-		};
 	}
 }
 

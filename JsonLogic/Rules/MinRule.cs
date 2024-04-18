@@ -52,17 +52,6 @@ public class MinRule : Rule
 
 		return items.Min(i => i.Value!.Value);
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		return ExpressionExtensions.EvaluateItems(Items, parameter, options)
-			.DowncastNumber()
-			.Select(x => x.Numberify(options))
-			.Aggregate((a, c) => Expression.Call(_minMethod, a, c));
-	}
-
-	private static readonly MethodInfo _minMethod = ((Func<decimal, decimal, decimal>)Math.Min).Method;
-
 }
 
 internal class MinRuleJsonConverter : WeaklyTypedJsonConverter<MinRule>

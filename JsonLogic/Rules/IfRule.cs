@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -83,35 +80,6 @@ public class IfRule : Rule
 
 		throw new NotImplementedException("Something went wrong. This shouldn't happen.");
 	}
-
-	/// <inheritdoc />
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var components = ExpressionExtensions.EvaluateItems(Components, parameter, options).ToList();
-		return new [] { CreateRuleRecursive(components) }.Downcast().First();
-	}
-
-	private static Expression CreateRuleRecursive(List<Expression> components)
-	{
-		if (components.Count <= 3)
-		{
-			return CreateRuleExpression(components);
-		}
-
-		return Expression.Condition(
-			new [] { components[0] }.Downcast(typeof(bool)).First(),
-			components[1],
-			CreateRuleRecursive(components.Skip(2).ToList()));
-	}
-
-	private static Expression CreateRuleExpression(List<Expression> components) => components.Count switch
-	{
-		0 => Expression.Constant(null),
-		1 => new [] { components[0] }.Downcast(typeof(bool)).First(),
-		2 => Expression.Condition(new [] { components[0] }.Downcast(typeof(bool)).First(), components[1], Expression.Constant(null)),
-		3 => Expression.Condition(new [] { components[0] }.Downcast(typeof(bool)).First(), components[1], components[2]),
-		_ => throw new InvalidOperationException("Invalid number of arguments for if statement, expected 0, 1, 2 or 3 parameters")
-	};
 }
 
 internal class IfRuleJsonConverter : WeaklyTypedJsonConverter<IfRule>

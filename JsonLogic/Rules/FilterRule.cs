@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -56,28 +53,6 @@ public class FilterRule : Rule
 
 		return arr.Where(i => Rule.Apply(data, i).IsTruthy()).ToJsonArray();
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var input = Input.CreateExpression(parameter, options);
-
-		if (!input.Type.TryGetGenericCollectionType(out var type))
-		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
-		}
-
-		var param = Expression.Parameter(type, type.Name);
-		var rule = Rule.CreateExpression(param, options);
-		return Expression.Call(
-			_whereMethod.MakeGenericMethod(type),
-			input,
-			Expression.Lambda(rule, param));
-	}
-
-	private static readonly MethodInfo _whereMethod = typeof(Enumerable)
-		.GetMethods()
-		.Where(x => x.Name == "Where")
-		.Single(x => x.GetParameters().Last().ParameterType.GetGenericArguments().Length == 2);
 }
 
 internal class FilterRuleJsonConverter : WeaklyTypedJsonConverter<FilterRule>

@@ -43,11 +43,6 @@ public class BooleanCastRule : Rule
 	{
 		return Value.Apply(data, contextData).IsTruthy();
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		return new [] { Value.CreateExpression(parameter, options) }.Downcast().First().IsTruthy();
-	}
 }
 
 internal class BooleanCastRuleJsonConverter : WeaklyTypedJsonConverter<BooleanCastRule>

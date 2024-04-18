@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -50,16 +48,6 @@ public class LooseEqualsRule : Rule
 		var b = B.Apply(data, contextData);
 
 		return a.LooseEquals(b);
-	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var args = new[]
-		{
-			A.CreateExpression(parameter, options),
-			B.CreateExpression(parameter, options),
-		}.Downcast();
-		return Expression.Equal(args[0], args[1]);
 	}
 }
 

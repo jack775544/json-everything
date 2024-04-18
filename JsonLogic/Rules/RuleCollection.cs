@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -36,11 +34,6 @@ public class RuleCollection : Rule
 	public override JsonNode? Apply(JsonNode? data, JsonNode? contextData = null)
 	{
 		return Rules.Select(x => x.Apply(data, contextData)).ToJsonArray();
-	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		return Expression.NewArrayInit(typeof(object), ExpressionExtensions.EvaluateItems(Rules, parameter, options));
 	}
 }
 

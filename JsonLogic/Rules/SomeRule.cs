@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -55,29 +52,6 @@ public class SomeRule : Rule
 		return arr.Select(value => Rule.Apply(contextData, value))
 			.Any(result => result.IsTruthy());
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var input = Input.CreateExpression(parameter, options);
-
-		if (!input.Type.TryGetGenericCollectionType(out var type))
-		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
-		}
-
-		var param = Expression.Parameter(type, type.Name);
-
-		var rule = Rule.CreateExpression(param, options);
-		return Expression.Call(
-			_anyMethod.MakeGenericMethod(type),
-			input,
-			Expression.Lambda(rule, param));
-	}
-
-	private static readonly MethodInfo _anyMethod = typeof(Enumerable)
-		.GetMethods()
-		.Where(x => x.Name == "Any")
-		.Single(x => x.GetParameters().Length == 2);
 }
 
 internal class SomeRuleJsonConverter : WeaklyTypedJsonConverter<SomeRule>

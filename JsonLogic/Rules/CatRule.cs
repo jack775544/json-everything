@@ -57,28 +57,6 @@ public class CatRule : Rule
 
 		return result;
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options)
-			.Downcast(typeof(string))
-			.Select(ExpressionExtensions.Stringify)
-			.ToList();
-
-		return items.Count switch
-		{
-			0 => Expression.Constant(""),
-			1 => items[0],
-			2 => Expression.Call(_stringConcat2Method, items[0], items[1]),
-			3 => Expression.Call(_stringConcat3Method, items[0], items[1], items[2]),
-			4 => Expression.Call(_stringConcat4Method, items[0], items[1], items[2], items[3]),
-			_ => items.Aggregate((a, c) => Expression.Call(_stringConcat2Method, a, c))
-		};
-	}
-
-	private static readonly MethodInfo _stringConcat2Method = ((Func<string, string, string>)string.Concat).Method;
-	private static readonly MethodInfo _stringConcat3Method = ((Func<string, string, string, string>)string.Concat).Method;
-	private static readonly MethodInfo _stringConcat4Method = ((Func<string, string, string, string, string>)string.Concat).Method;
 }
 
 internal class CatRuleJsonConverter : WeaklyTypedJsonConverter<CatRule>

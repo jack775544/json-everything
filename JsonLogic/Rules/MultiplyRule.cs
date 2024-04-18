@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -57,15 +55,6 @@ public class MultiplyRule : Rule
 		}
 
 		return result;
-	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var items = ExpressionExtensions.EvaluateItems(Items, parameter, options)
-			.Downcast()
-			.Select(x => x.Numberify(options))
-			.ToList();
-		return items.Count == 1 ? items[0] : items.Aggregate(Expression.MultiplyChecked);
 	}
 }
 

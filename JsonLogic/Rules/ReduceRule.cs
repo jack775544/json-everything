@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -74,51 +69,6 @@ public class ReduceRule : Rule
 		}
 
 		return accumulator;
-	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var input = Input.CreateExpression(parameter, options);
-		var initial = new [] { Initial.CreateExpression(parameter, options) }.Downcast().First();
-
-		if (!input.Type.TryGetGenericCollectionType(out var collectionType))
-		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in reduce rule");
-		}
-
-		// The algorithm here is a little complex. The JsonLogic function is expecting a parameter object in the shape of
-		// { current, accumulator }, however the C# aggregate method passes 2 args to represent those instead.
-		// So we call provided rule expression with a class of that shape. Then we use an expression visitor to replace
-		// instances where that class was accessed with the parameter expressions needed for C# aggregate instead.
-		var stateType = typeof(ReduceState<,>).MakeGenericType(collectionType, initial.Type);
-		var param = Expression.Parameter(stateType, "reduceState");
-		var accumulatorParam = Expression.Parameter(initial.Type, "accumulator");
-		var currentParam = Expression.Parameter(collectionType, "current");
-
-		var rule = PropertyReplacer.Replace(
-			Rule.CreateExpression(param, options),
-			new List<PropertyReplacerInfo>
-			{
-				new(stateType, stateType.GetMember(nameof(ReduceState<object, object>.Accumulator)).First(), accumulatorParam),
-				new(stateType, stateType.GetMember(nameof(ReduceState<object, object>.Current)).First(), currentParam)
-			});
-
-		return Expression.Call(
-			_aggregateMethod.MakeGenericMethod(collectionType, initial.Type),
-			input,
-			initial,
-			Expression.Lambda(rule, accumulatorParam, currentParam));
-	}
-
-	private static readonly MethodInfo _aggregateMethod = typeof(Enumerable)
-		.GetMethods()
-		.Where(x => x.Name == nameof(Enumerable.Aggregate))
-		.Single(x => x.GetParameters().Length == 3);
-
-	private class ReduceState<TSource, TAggregate>
-	{
-		public TSource? Current { get; set; }
-		public TAggregate? Accumulator { get; set; }
 	}
 }
 

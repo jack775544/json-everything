@@ -52,13 +52,6 @@ public class AndRule : Rule
 
 		return first;
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		return ExpressionExtensions.EvaluateItems(Items, parameter, options)
-			.Downcast(typeof(bool))
-			.Aggregate((Expression)Expression.Constant(true), Expression.AndAlso);
-	}
 }
 
 internal class AndRuleJsonConverter : WeaklyTypedJsonConverter<AndRule>

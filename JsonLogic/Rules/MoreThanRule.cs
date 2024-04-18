@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -63,14 +61,6 @@ public class MoreThanRule : Rule
 		var stringB = b.Stringify();
 
 		return string.Compare(stringA, stringB, StringComparison.Ordinal) > 0;
-	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var a = A.CreateExpression(parameter, options).Numberify(0, options);
-		var b = B.CreateExpression(parameter, options).Numberify(0, options);
-		var args = new[] { a, b }.Downcast();
-		return Expression.GreaterThan(args[0], args[1]);
 	}
 }
 

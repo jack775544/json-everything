@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -55,28 +52,6 @@ public class MapRule : Rule
 
 		return arr.Select(i => Rule.Apply(data, i)).ToJsonArray();
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var input = Input.CreateExpression(parameter, options);
-
-		if (!input.Type.TryGetGenericCollectionType(out var type))
-		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
-		}
-
-		var param = Expression.Parameter(type, type.Name);
-		var rule = Rule.CreateExpression(param, options);
-		return Expression.Call(
-			_selectMethod.MakeGenericMethod(type, rule.Type),
-			input,
-			Expression.Lambda(rule, param));
-	}
-
-	private static readonly MethodInfo _selectMethod = typeof(Enumerable)
-		.GetMethods()
-		.Where(x => x.Name == "Select")
-		.Single(x => x.GetParameters().Last().ParameterType.GetGenericArguments().Length == 2);
 }
 
 internal class MapRuleJsonConverter : WeaklyTypedJsonConverter<MapRule>

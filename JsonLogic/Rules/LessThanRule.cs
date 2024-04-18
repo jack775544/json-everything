@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -111,25 +109,6 @@ public class LessThanRule : Rule
 
 		return string.Compare(stringA, stringB, StringComparison.Ordinal) < 0 &&
 		       string.Compare(stringB, stringC, StringComparison.Ordinal) < 0;
-	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		var a = A.CreateExpression(parameter, options);
-		var b = B.CreateExpression(parameter, options);
-
-		if (C == null)
-		{
-			var args = new[] { a, b }.Downcast();
-			return Expression.LessThan(args[0], args[1]);
-		}
-
-		var c = C.CreateExpression(parameter, options).Numberify(options);
-
-		var argsWithC = new[] { a, b, c }.Downcast();
-		return Expression.AndAlso(
-			Expression.LessThan(argsWithC[0], argsWithC[1]),
-			Expression.LessThan(argsWithC[1], argsWithC[2]));
 	}
 }
 

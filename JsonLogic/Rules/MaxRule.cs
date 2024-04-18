@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -54,16 +51,6 @@ public class MaxRule : Rule
 
 		return items.Max(i => i.Value!.Value);
 	}
-
-	public override Expression CreateExpression(Expression parameter, CreateExpressionOptions options)
-	{
-		return ExpressionExtensions.EvaluateItems(Items, parameter, options)
-			.Downcast()
-			.Select(x => x.Numberify(options))
-			.Aggregate((a, c) => Expression.Call(_maxMethod, a, c));
-	}
-
-	private static readonly MethodInfo _maxMethod = ((Func<decimal, decimal, decimal>)Math.Max).Method;
 }
 
 internal class MaxRuleJsonConverter : WeaklyTypedJsonConverter<MaxRule>
