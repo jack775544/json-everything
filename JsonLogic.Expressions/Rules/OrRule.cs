@@ -13,7 +13,7 @@ public class OrRuleExpression : RuleExpression<OrRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(OrRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return ExpressionExtensions.EvaluateItems(rule.Items, registry, parameter, options)
+		return ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
 			.Downcast()
 			.Aggregate((Expression)Expression.Constant(false), Expression.OrElse);
 	}

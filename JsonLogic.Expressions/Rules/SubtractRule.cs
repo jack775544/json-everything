@@ -13,14 +13,14 @@ public class SubtractRuleExpression : RuleExpression<SubtractRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(SubtractRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionExtensions.EvaluateItems(rule.Items, registry, parameter, options)
+		var items = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
 			.Downcast()
 			.Select(x => x.Numberify(0, options))
 			.ToList();
 
 		return items.Count switch
 		{
-			0 => ExpressionExtensions.CreateConstant(0, true, options),
+			0 => ExpressionUtilities.CreateConstant(0, true, options),
 			1 => Expression.NegateChecked(items[0].Numberify(options)),
 			_ => items.Aggregate(Expression.SubtractChecked),
 		};

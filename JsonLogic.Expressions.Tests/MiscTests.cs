@@ -26,6 +26,7 @@ public class MiscTests
 	[Test]
 	public void BigTestCase()
 	{
+		// language=JSON
 		var logic = """
 		            {
 		              "and": [

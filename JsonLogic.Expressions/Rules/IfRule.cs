@@ -15,7 +15,7 @@ public class IfRuleExpression : RuleExpression<IfRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(IfRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var components = ExpressionExtensions.EvaluateItems(rule.Components, registry, parameter, options).ToList();
+		var components = ExpressionUtilities.EvaluateItems(rule.Components, registry, parameter, options).ToList();
 		return new [] { CreateRuleRecursive(components) }.Downcast().First();
 	}
 	

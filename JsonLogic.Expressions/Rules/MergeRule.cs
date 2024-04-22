@@ -26,7 +26,7 @@ public class MergeRuleExpression : RuleExpression<MergeRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(MergeRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionExtensions.EvaluateItems(rule.Items, registry, parameter, options).Downcast().ToList();
+		var items = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options).Downcast().ToList();
 
 		var arrayItems = new List<Expression>(items.Count);
 		Type? genericType = null;

@@ -13,7 +13,7 @@ public class MultiplyRuleExpression : RuleExpression<MultiplyRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(MultiplyRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionExtensions.EvaluateItems(rule.Items, registry, parameter, options)
+		var items = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
 			.DowncastNumber()
 			.Select(x => x.Numberify(options))
 			.ToList();

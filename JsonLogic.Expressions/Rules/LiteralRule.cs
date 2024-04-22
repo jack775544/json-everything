@@ -25,13 +25,13 @@ public class LiteralRuleExpression : RuleExpression<LiteralRule>
 	{
 		if (node == null)
 		{
-			return ExpressionExtensions.CreateConstant<object?>(null, createBox, options);
+			return ExpressionUtilities.CreateConstant<object?>(null, createBox, options);
 		}
 
 		switch (node.GetValueKind())
 		{
 			case JsonValueKind.Undefined:
-				return ExpressionExtensions.CreateConstant<object?>(null, createBox, options);
+				return ExpressionUtilities.CreateConstant<object?>(null, createBox, options);
 			case JsonValueKind.Object:
 				throw new NotImplementedException("Object values not yet implemented");
 			case JsonValueKind.Array:
@@ -44,15 +44,15 @@ public class LiteralRuleExpression : RuleExpression<LiteralRule>
 
 				return Expression.NewArrayInit(values[0].Type, values);
 			case JsonValueKind.String:
-				return ExpressionExtensions.CreateConstant(node.GetValue<string>(), createBox, options);
+				return ExpressionUtilities.CreateConstant(node.GetValue<string>(), createBox, options);
 			case JsonValueKind.Number:
-				return ExpressionExtensions.CreateConstant(node.Numberify(), createBox, options);
+				return ExpressionUtilities.CreateConstant(node.Numberify(), createBox, options);
 			case JsonValueKind.True:
-				return ExpressionExtensions.CreateConstant(true, createBox, options);
+				return ExpressionUtilities.CreateConstant(true, createBox, options);
 			case JsonValueKind.False:
-				return ExpressionExtensions.CreateConstant(false, createBox, options);
+				return ExpressionUtilities.CreateConstant(false, createBox, options);
 			case JsonValueKind.Null:
-				return ExpressionExtensions.CreateConstant<object?>(null, createBox, options);
+				return ExpressionUtilities.CreateConstant<object?>(null, createBox, options);
 			default:
 				throw new ArgumentOutOfRangeException();
 		}

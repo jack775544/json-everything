@@ -19,7 +19,7 @@ public class CatRuleExpression : RuleExpression<CatRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(CatRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionExtensions.EvaluateItems(rule.Items, registry, parameter, options)
+		var items = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
 			.Downcast(typeof(string))
 			.Select(ExpressionExtensions.Stringify)
 			.ToList();

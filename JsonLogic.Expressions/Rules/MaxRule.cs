@@ -17,7 +17,7 @@ public class MaxRuleExpression : RuleExpression<MaxRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(MaxRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return ExpressionExtensions.EvaluateItems(rule.Items, registry, parameter, options)
+		return ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
 			.Downcast()
 			.Select(x => x.Numberify(options))
 			.Aggregate((a, c) => Expression.Call(_maxMethod, a, c));
