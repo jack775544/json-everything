@@ -11,6 +11,6 @@ public class LooseNotEqualsRuleExpression : RuleExpression<LooseNotEqualsRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(LooseNotEqualsRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.NotEqual(registry.CreateExpression(rule.A, parameter, options), registry.CreateExpression(rule.B, parameter, options));
+		return Expression.NotEqual(registry.CreateExpressionInternal(rule.A, parameter, options), registry.CreateExpressionInternal(rule.B, parameter, options));
 	}
 }

@@ -14,8 +14,8 @@ public class StrictNotEqualsRuleExpression : RuleExpression<StrictNotEqualsRule>
 	{
 		var args = new[]
 		{
-			registry.CreateExpression(rule.A, parameter, options),
-			registry.CreateExpression(rule.B, parameter, options)
+			registry.CreateExpressionInternal(rule.A, parameter, options),
+			registry.CreateExpressionInternal(rule.B, parameter, options)
 		}.Downcast();
 		return Expression.NotEqual(args[0], args[1]);
 	}

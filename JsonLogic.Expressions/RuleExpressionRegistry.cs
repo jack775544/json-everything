@@ -102,22 +102,23 @@ public class RuleExpressionRegistry
 	/// <param name="parameter">An expression to be used as the JSON Logic data.</param>
 	/// <param name="options">Options for creating the expression.</param>
 	/// <returns>An expression body that represents the logic rule.</returns>
-	public Expression CreateExpression(Rule rule, Expression parameter, CreateExpressionOptions options)
+	internal Expression CreateExpressionInternal(Rule rule, Expression parameter, CreateExpressionOptions options)
 	{
-		return CreateExpression(rule, rule.GetType(), parameter, options);
+		return _registry[rule.GetType()].CreateRuleExpression(rule, this, parameter, options);
 	}
-
+	
 	/// <summary>
 	/// Creates an expression predicate for the provided rule.
 	/// </summary>
 	/// <param name="rule">The rule to create the expression for.</param>
-	/// <param name="ruleType">The type of the rule.</param>
 	/// <param name="parameter">An expression to be used as the JSON Logic data.</param>
 	/// <param name="options">Options for creating the expression.</param>
 	/// <returns>An expression body that represents the logic rule.</returns>
-	public Expression CreateExpression(Rule rule, Type ruleType, Expression parameter, CreateExpressionOptions options)
+	public Expression CreateExpression(Rule rule, Expression parameter, CreateExpressionOptions options)
 	{
-		return _registry[ruleType].CreateRuleExpression(rule, this, parameter, options);
+		var expression = CreateExpressionInternal(rule, parameter, options);
+
+		return options.WrapConstants ? ConstantReplacer.Replace(expression) : expression;
 	}
 
 	/// <summary>

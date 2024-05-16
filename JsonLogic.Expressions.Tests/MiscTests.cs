@@ -30,6 +30,7 @@ public class MiscTests
 		var logic = """
 		            {
 		              "and": [
+		                true,
 		                { "==": [{ "var" : ["IntField"] }, 1] },
 		                { "==": [{ "var" : ["DoubleField"] }, 1] },
 		                { "==": [{ "var" : ["StringField"] }, "testing"] },
@@ -45,7 +46,10 @@ public class MiscTests
 		            """;
 		var rule = JsonSerializer.Deserialize<Rule>(logic, TestDataSerializerContext.Default.Rule);
 		
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
 		var func = expression.Compile();
 
 		var data = new TestData[]
@@ -55,5 +59,24 @@ public class MiscTests
 		};
 
 		Assert.DoesNotThrow(() => data.Where(x => func(x)).ToList());
+	}
+
+	[TestCase]
+	public void WrapConstantsWorks()
+	{
+		// language=JSON
+		var logic = """
+		            { "==": [1, true] }
+		            """;
+
+		var rule = JsonSerializer.Deserialize<Rule>(logic, TestDataSerializerContext.Default.Rule);
+
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
+		var func = expression.Compile();
+		
+		Assert.AreEqual(true, func(null));
 	}
 }

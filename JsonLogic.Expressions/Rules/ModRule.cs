@@ -14,8 +14,8 @@ public class ModRuleExpression : RuleExpression<ModRule>
 	{
 		var args = new[]
 		{
-			registry.CreateExpression(rule.A, parameter, options),
-			registry.CreateExpression(rule.B, parameter, options)
+			registry.CreateExpressionInternal(rule.A, parameter, options),
+			registry.CreateExpressionInternal(rule.B, parameter, options)
 		}.Downcast();
 		return Expression.Modulo(args[0], args[1]);
 	}

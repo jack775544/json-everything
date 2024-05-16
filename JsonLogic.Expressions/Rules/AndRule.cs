@@ -13,8 +13,12 @@ public class AndRuleExpression : RuleExpression<AndRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(AndRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
-			.Downcast(typeof(bool))
-			.Aggregate((Expression)Expression.Constant(true), Expression.AndAlso);
+		var expressions = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options).Downcast(typeof(bool));
+		return expressions.Count switch
+		{
+			0 => ExpressionUtilities.CreateConstant(true, false, options),
+			1 => expressions[0],
+			_ => expressions.Aggregate(Expression.AndAlso)
+		};
 	}
 }

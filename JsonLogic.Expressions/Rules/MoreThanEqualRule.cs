@@ -12,8 +12,8 @@ public class MoreThanEqualRuleExpression : RuleExpression<MoreThanEqualRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(MoreThanEqualRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var a = registry.CreateExpression(rule.A, parameter, options);
-		var b = registry.CreateExpression(rule.B, parameter, options);
+		var a = registry.CreateExpressionInternal(rule.A, parameter, options);
+		var b = registry.CreateExpressionInternal(rule.B, parameter, options);
 		var args = new[] { a, b }.DowncastComparable();
 		return Expression.GreaterThanOrEqual(args[0], args[1]);
 	}

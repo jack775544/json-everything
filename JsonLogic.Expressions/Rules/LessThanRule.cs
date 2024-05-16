@@ -12,8 +12,8 @@ public class LessThanRuleExpression : RuleExpression<LessThanRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(LessThanRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var a = registry.CreateExpression(rule.A, parameter, options);
-		var b = registry.CreateExpression(rule.B, parameter, options);
+		var a = registry.CreateExpressionInternal(rule.A, parameter, options);
+		var b = registry.CreateExpressionInternal(rule.B, parameter, options);
 
 		if (rule.C == null)
 		{
@@ -21,7 +21,7 @@ public class LessThanRuleExpression : RuleExpression<LessThanRule>
 			return Expression.LessThan(args[0], args[1]);
 		}
 
-		var c = registry.CreateExpression(rule.C, parameter, options);
+		var c = registry.CreateExpressionInternal(rule.C, parameter, options);
 
 		var argsWithC = new[] { a, b, c }.DowncastComparable();
 		return Expression.AndAlso(

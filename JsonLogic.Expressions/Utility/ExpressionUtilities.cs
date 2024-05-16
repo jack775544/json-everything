@@ -8,7 +8,7 @@ internal class ExpressionUtilities
 {
 	public static IEnumerable<Expression> EvaluateItems(IEnumerable<Rule> items, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return items.Select(x => registry.CreateExpression(x, parameter, options));
+		return items.Select(x => registry.CreateExpressionInternal(x, parameter, options));
 	}
 
 	public static Expression CreateConstant<T>(T constant, bool createBox, CreateExpressionOptions options)
@@ -18,13 +18,6 @@ internal class ExpressionUtilities
 			return Expression.Constant(new DataObject(constant, options));
 		}
 
-		if (!options.WrapConstants)
-		{
-			return Expression.Constant(constant);
-		}
-
-		var data = new DataObject(constant, options);
-
-		return Expression.PropertyOrField(Expression.Constant(data), nameof(DataObject.Field));
+		return Expression.Constant(constant);
 	}
 }

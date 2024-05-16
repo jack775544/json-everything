@@ -20,8 +20,8 @@ public class InRuleExpression : RuleExpression<InRule>
 	public override Expression CreateExpression(InRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
 		return Expression.Call(
-			new [] { registry.CreateExpression(rule.Value, parameter, options) }.Downcast(typeof(string)).First().Stringify(),
+			new [] { registry.CreateExpressionInternal(rule.Value, parameter, options) }.Downcast(typeof(string)).First().Stringify(),
 			_containsMethod,
-			new [] { registry.CreateExpression(rule.Test, parameter, options) }.Downcast(typeof(string)).First().Stringify());
+			new [] { registry.CreateExpressionInternal(rule.Test, parameter, options) }.Downcast(typeof(string)).First().Stringify());
 	}
 }

@@ -25,7 +25,7 @@ public class MapRuleExpression : RuleExpression<MapRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(MapRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var input = registry.CreateExpression(rule.Input, parameter, options);
+		var input = registry.CreateExpressionInternal(rule.Input, parameter, options);
 
 		if (!input.Type.TryGetGenericCollectionType(out var type))
 		{
@@ -33,7 +33,7 @@ public class MapRuleExpression : RuleExpression<MapRule>
 		}
 
 		var param = Expression.Parameter(type, type.Name);
-		var body = registry.CreateExpression(rule.Rule, param, options);
+		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
 		return Expression.Call(
 			_selectMethod.MakeGenericMethod(type, body.Type),
 			input,

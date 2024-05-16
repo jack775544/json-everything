@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Text.Json.Nodes;
+using Json.Logic.Expressions;
 using Json.Logic.Expressions.Rules;
 using Json.Logic.Expressions.Utility;
 using NUnit.Framework;

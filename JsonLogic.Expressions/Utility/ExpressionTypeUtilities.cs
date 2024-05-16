@@ -67,7 +67,7 @@ internal static class ExpressionTypeUtilities
 		var mostCommonType = types.Any(x => _numberTypeHierarchy.Contains(x))
 			? types.MaxBy(x => _numberTypeHierarchy.IndexOf(x)) ?? _numberTypeHierarchy.Last()
 			: _numberTypeHierarchy.Last();
-		var visitor = new DataObjectReplacer(mostCommonType, new DataObject(0, new CreateExpressionOptions { WrapConstants = false }));
+		var visitor = new DataObjectReplacer(mostCommonType, new DataObject(0, new CreateExpressionOptions()));
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 	
@@ -107,7 +107,7 @@ internal static class ExpressionTypeUtilities
 			}
 		}
 
-		var visitor = new DataObjectReplacer(mostCommonType, new DataObject(0, new CreateExpressionOptions { WrapConstants = false }));
+		var visitor = new DataObjectReplacer(mostCommonType, new DataObject(0, new CreateExpressionOptions()));
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 

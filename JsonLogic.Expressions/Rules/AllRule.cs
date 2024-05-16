@@ -16,7 +16,7 @@ public class AllRuleExpression : RuleExpression<AllRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(AllRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var input = registry.CreateExpression(rule.Input, parameter, options);
+		var input = registry.CreateExpressionInternal(rule.Input, parameter, options);
 
 		if (!input.Type.TryGetGenericCollectionType(out var paramType))
 		{
@@ -24,7 +24,7 @@ public class AllRuleExpression : RuleExpression<AllRule>
 		}
 
 		var param = Expression.Parameter(paramType, paramType.Name);
-		var body = registry.CreateExpression(rule.Rule, param, options);
+		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
 		return Expression.Call(
 			_allMethod.MakeGenericMethod(paramType),
 			input,

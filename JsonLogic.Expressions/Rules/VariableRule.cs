@@ -41,7 +41,7 @@ public class VariableRuleExpression : RuleExpression<VariableRule>
 				property.Type.IsGenericType && property.Type.GetGenericTypeDefinition() == typeof(Nullable<>)
 				|| !property.Type.IsValueType)
 			{
-				var defaultValue = registry.CreateExpression(rule.DefaultValue, parameter, options);
+				var defaultValue = registry.CreateExpressionInternal(rule.DefaultValue, parameter, options);
 				var args = new[]
 				{
 					property,

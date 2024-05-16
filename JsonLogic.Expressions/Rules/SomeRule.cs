@@ -19,7 +19,7 @@ public class SomeRuleExpression : RuleExpression<SomeRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(SomeRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var input = registry.CreateExpression(rule.Input, parameter, options);
+		var input = registry.CreateExpressionInternal(rule.Input, parameter, options);
 
 		if (!input.Type.TryGetGenericCollectionType(out var type))
 		{
@@ -28,7 +28,7 @@ public class SomeRuleExpression : RuleExpression<SomeRule>
 
 		var param = Expression.Parameter(type, type.Name);
 
-		var body = registry.CreateExpression(rule.Rule, param, options);
+		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
 		return Expression.Call(
 			_anyMethod.MakeGenericMethod(type),
 			input,

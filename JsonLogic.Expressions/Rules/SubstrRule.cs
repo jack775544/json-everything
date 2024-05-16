@@ -17,10 +17,10 @@ public class SubstrRuleExpression : RuleExpression<SubstrRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(SubstrRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var str = new [] { registry.CreateExpression(rule.Input, parameter, options) }.Downcast().First().Stringify();
-		var start = new[] { registry.CreateExpression(rule.Start, parameter, options) }.Downcast(typeof(int)).First();
+		var str = new [] { registry.CreateExpressionInternal(rule.Input, parameter, options) }.Downcast().First().Stringify();
+		var start = new[] { registry.CreateExpressionInternal(rule.Start, parameter, options) }.Downcast(typeof(int)).First();
 		var count = rule.Count != null
-			? new[] { registry.CreateExpression(rule.Count, parameter, options) }.Downcast(typeof(int)).First()
+			? new[] { registry.CreateExpressionInternal(rule.Count, parameter, options) }.Downcast(typeof(int)).First()
 			: null;
 		return count == null
 			? Expression.Call(str, _substringMethod, start)

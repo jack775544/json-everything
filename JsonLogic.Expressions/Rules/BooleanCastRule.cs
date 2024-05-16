@@ -13,7 +13,7 @@ public class BooleanCastRuleExpression : RuleExpression<BooleanCastRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(BooleanCastRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var expression = registry.CreateExpression(rule.Value, parameter, options);
+		var expression = registry.CreateExpressionInternal(rule.Value, parameter, options);
 		return new [] { expression }.Downcast().First().IsTruthy();
 	}
 }

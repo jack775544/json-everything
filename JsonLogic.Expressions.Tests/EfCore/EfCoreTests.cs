@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Json.Logic.Expressions;
+using Json.Logic.Expressions.Utility;
 using Json.Logic.Rules;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,7 @@ file class TestDatabase : IAsyncDisposable
 		_loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 		DbContext = new TestDbContext(new DbContextOptionsBuilder<TestDbContext>()
 			.UseSqlite(_connection)
+			.EnableSensitiveDataLogging()
 			.UseLoggerFactory(_loggerFactory)
 			.Options);
 	}
@@ -73,6 +76,11 @@ file class TestDatabase : IAsyncDisposable
 
 public class EfCoreTests
 {
+	private static readonly CreateExpressionOptions _options = new()
+	{
+		WrapConstants = true,
+	};
+
 	[Test]
 	public async Task Reduce()
 	{
@@ -91,7 +99,7 @@ public class EfCoreTests
 				new CatRule(new VariableRule("current.Name"), new VariableRule("accumulator")),
 				""),
 			"");
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 		
 		var departmentCount = await database.DbContext
 			.Departments
@@ -107,7 +115,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new StrictEqualsRule(new VariableRule("Name"), "HR");
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 		
 		var departmentCount = await database.DbContext
 			.Departments
@@ -123,7 +131,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new StrictEqualsRule(1, new VariableRule("Id"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 		
 		var departmentCount = await database.DbContext
 			.Departments
@@ -139,7 +147,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new StrictEqualsRule(1M, new VariableRule("Id"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 		
 		var departmentCount = await database.DbContext
 			.Departments
@@ -155,7 +163,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new StrictEqualsRule("1", new VariableRule("Id"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 
 		var departmentCount = await database.DbContext
 			.Departments
@@ -173,7 +181,7 @@ public class EfCoreTests
 		var rule = new OrRule(
 			new StrictEqualsRule(1, new VariableRule("Id")),
 			new StrictEqualsRule(new VariableRule("Name"), "HR"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 		
 		var departmentCount = await database.DbContext
 			.Departments
@@ -189,7 +197,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new StrictEqualsRule("RunBobRun", new CatRule("Run", new VariableRule("Name"), "Run"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, bool>(rule, _options);
 
 		var departmentCount = await database.DbContext
 			.Employees
@@ -205,7 +213,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new SomeRule(new VariableRule("Employees"), new StrictEqualsRule(new VariableRule("Name"), "Alice"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 
 		var departmentCount = await database.DbContext
 			.Departments
@@ -221,7 +229,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new AllRule(new VariableRule("Employees"), new StrictEqualsRule(new VariableRule("Name"), "Jane"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 
 		Console.WriteLine(database.DbContext
 			.Departments
@@ -242,7 +250,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new NoneRule(new VariableRule("Employees"), new StrictEqualsRule(new VariableRule("Name"), "Alice"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 
 		var departmentCount = await database.DbContext
 			.Departments
@@ -258,7 +266,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new StrictEqualsRule(new VariableRule("Employees.Count"), 3);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
 
 		var departmentCount = await database.DbContext
 			.Departments
@@ -276,7 +284,7 @@ public class EfCoreTests
 		var rule = new AndRule(
 			new StrictEqualsRule(new VariableRule("Name"), "Alice"),
 			new MoreThanRule(new VariableRule("DateOfBirth"), "1995-01-01T00:00:00"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, bool>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, bool>(rule, _options);
 
 		Console.WriteLine(database.DbContext
 			.Employees
@@ -297,7 +305,7 @@ public class EfCoreTests
 		await database.InitialiseAsync();
 
 		var rule = new VariableRule("Name");
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, object>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, object>(rule, _options);
 
 		var employees = await database.DbContext
 			.Employees

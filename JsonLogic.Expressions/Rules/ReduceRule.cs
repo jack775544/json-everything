@@ -15,8 +15,8 @@ public class ReduceRuleExpression : RuleExpression<ReduceRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(ReduceRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var input = registry.CreateExpression(rule.Input, parameter, options);
-		var initial = new [] { registry.CreateExpression(rule.Initial, parameter, options) }.Downcast().First();
+		var input = registry.CreateExpressionInternal(rule.Input, parameter, options);
+		var initial = new [] { registry.CreateExpressionInternal(rule.Initial, parameter, options) }.Downcast().First();
 
 		if (!input.Type.TryGetGenericCollectionType(out var collectionType))
 		{
@@ -33,7 +33,7 @@ public class ReduceRuleExpression : RuleExpression<ReduceRule>
 		var currentParam = Expression.Parameter(collectionType, "current");
 
 		var body = PropertyReplacer.Replace(
-			registry.CreateExpression(rule.Rule, param, options),
+			registry.CreateExpressionInternal(rule.Rule, param, options),
 			new List<PropertyReplacerInfo>
 			{
 				new(stateType, stateType.GetMember(nameof(ReduceState<object, object>.Accumulator)).First(), accumulatorParam),
