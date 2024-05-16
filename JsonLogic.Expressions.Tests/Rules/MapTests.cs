@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Expressions.Tests;
+namespace Json.Logic.Expressions.Tests.Rules;
 
 public class MapTests
 {

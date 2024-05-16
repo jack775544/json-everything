@@ -1,31 +1,31 @@
 ﻿using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Expressions.Tests;
+namespace Json.Logic.Expressions.Tests.Rules;
 
-public class MaxTests
+public class MinTests
 {
 	[Test]
-	public void SingleValueReturnsMax()
+	public void SingleValueReturnsMin()
 	{
-		var rule = new MaxRule(3);
+		var rule = new MinRule(3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 		Assert.AreEqual(3m, expression.Compile()(null));
 	}
 
 	[Test]
-	public void TwoValuesReturnsMax()
+	public void TwoValuesReturnsMin()
 	{
-		var rule = new MaxRule(3, 2);
+		var rule = new MinRule(3, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(3m, expression.Compile()(null));
+		Assert.AreEqual(2m, expression.Compile()(null));
 	}
 	
 	[Test]
-	public void ThreeValuesReturnsMax()
+	public void ThreeValuesReturnsMin()
 	{
-		var rule = new MaxRule(3, 2, 4);
+		var rule = new MinRule(3, 2, 4);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(4m, expression.Compile()(null));
+		Assert.AreEqual(2m, expression.Compile()(null));
 	}
 }

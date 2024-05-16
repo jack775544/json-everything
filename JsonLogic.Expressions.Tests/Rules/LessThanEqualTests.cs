@@ -1,110 +1,102 @@
 using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Expressions.Tests;
+namespace Json.Logic.Expressions.Tests.Rules;
 
-public class LessThanTests
+public class LessThanEqualTests
 {
 	[Test]
 	public void LessThanTwoNumbersReturnsTrue()
 	{
-		var rule = new LessThanRule(1, 2);
+		var rule = new LessThanEqualRule(1, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}
 
 	[Test]
-	public void EqualTwoNumbersReturnsFalse()
+	public void EqualTwoNumbersReturnsTrue()
 	{
-		var rule = new LessThanRule(1, 1);
+		var rule = new LessThanEqualRule(2, 2);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+		Assert.IsTrue(expression.Compile()(null));
+	}
+
+	[Test]
+	public void LessThanEqualTwoNumbersReturnsFalse()
+	{
+		var rule = new LessThanEqualRule(3, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));
 	}
 
 	[Test]
-	public void LessThanTwoNumbersReturnsFalse()
+	public void LessThanEqualNullCastsNullToZero()
 	{
-		var rule = new LessThanRule(3, 2);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
-	}
-
-	[Test]
-	public void LessThanBooleanReturnsTrue()
-	{
-		var rule = new LessThanRule(false, 2);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
-	}
-
-	[Test]
-	public void LessThanNullCastsNullToZero()
-	{
-		var rule = new LessThanRule(LiteralRule.Null, 2);
+		var rule = new LessThanEqualRule(LiteralRule.Null, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}
 	
 	[Test]
-	public void LessThanNumberAndStringNumberReturnsTrue()
+	public void LessThanEqualNumberAndStringNumberReturnsTrue()
 	{
-		var rule = new LessThanRule(1, "2");
+		var rule = new LessThanEqualRule(1, "2");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}
 	
 	[Test]
-	public void LessThanStringNumberAndNumberReturnsTrue()
+	public void LessThanEqualStringNumberAndNumberReturnsTrue()
 	{
-		var rule = new LessThanRule("1", 2);
+		var rule = new LessThanEqualRule("1", 1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}
 	
 	[Test]
-	public void LessThanTwoStringNumbersReturnsTrue()
+	public void LessThanEqualTwoStringNumbersReturnsTrue()
 	{
-		var rule = new LessThanRule("1", "2");
+		var rule = new LessThanEqualRule("1", "2");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}
-
+	
 	[Test]
 	public void BetweenValueInRangeReturnsTrue()
 	{
-		var rule = new LessThanRule(1, 2, 3);
+		var rule = new LessThanEqualRule(1, 2, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}
 
 	[Test]
-	public void BetweenValueAtLowEndReturnsFalse()
+	public void BetweenValueAtLowEndReturnsTrue()
 	{
-		var rule = new LessThanRule(1, 1, 3);
+		var rule = new LessThanEqualRule(1, 1, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()(null));
 	}
 
 	[Test]
 	public void BetweenValueUnderLowEndReturnsFalse()
 	{
-		var rule = new LessThanRule(1, 0, 3);
+		var rule = new LessThanEqualRule(1, 0, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));
 	}
 
 	[Test]
-	public void BetweenValueAtHighEndReturnsFalse()
+	public void BetweenValueAtHighEndReturnsTrue()
 	{
-		var rule = new LessThanRule(1, 3, 3);
+		var rule = new LessThanEqualRule(1, 3, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()(null));
 	}
 
 	[Test]
 	public void BetweenValueOverHighEndReturnsFalse()
 	{
-		var rule = new LessThanRule(1, 4, 3);
+		var rule = new LessThanEqualRule(1, 4, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));
 	}
@@ -112,7 +104,7 @@ public class LessThanTests
 	[Test]
 	public void BetweenLowEndNotNumberReturnsFalse()
 	{
-		var rule = new LessThanRule(false, 4, 3);
+		var rule = new LessThanEqualRule(false, 4, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));
 	}
@@ -120,7 +112,7 @@ public class LessThanTests
 	[Test]
 	public void BetweenValueNotNumberReturnsFalse()
 	{
-		var rule = new LessThanRule(1, false, 3);
+		var rule = new LessThanEqualRule(1, false, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));
 	}
@@ -128,23 +120,15 @@ public class LessThanTests
 	[Test]
 	public void BetweenHighEndNotNumberReturnsFalse()
 	{
-		var rule = new LessThanRule(1, 2, false);
+		var rule = new LessThanEqualRule(1, 2, false);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));
 	}
 	
 	[Test]
-	public void BetweenStringNumbersInRangeReturnsTrue()
-	{
-		var rule = new LessThanRule("1", "2", "3");
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
-	}
-	
-	[Test]
 	public void BetweenLowEndStringNumberReturnsTrue()
 	{
-		var rule = new LessThanRule("1", 2, 3);
+		var rule = new LessThanEqualRule("1", 1, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}
@@ -152,7 +136,7 @@ public class LessThanTests
 	[Test]
 	public void BetweenValueStringNumberReturnsTrue()
 	{
-		var rule = new LessThanRule(1, "2", 3);
+		var rule = new LessThanEqualRule(1, "2", 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}
@@ -160,7 +144,15 @@ public class LessThanTests
 	[Test]
 	public void BetweenHighEndStringNumberReturnsTrue()
 	{
-		var rule = new LessThanRule(1, 2, "3");
+		var rule = new LessThanEqualRule(1, 2, "3");
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+		Assert.IsTrue(expression.Compile()(null));
+	}
+
+	[Test]
+	public void LessThanTwoDateTimesReturnsTrue()
+	{
+		var rule = new LessThanEqualRule("2020-01-01", "2021-01-01");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
 	}

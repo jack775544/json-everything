@@ -1,80 +1,100 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Expressions.Tests;
+namespace Json.Logic.Expressions.Tests.Rules;
 
-public class NotTests
+public class InTests
 {
 	[Test]
-	public void EmptyArrayIsTrue()
+	public void InTwoStringsSecondContainsFirstReturnsTrue()
 	{
-		var rule = new NotRule(JsonNode.Parse("[]"));
+		var rule = new InRule("foo", "food");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+		
 		Assert.IsTrue(expression.Compile()(null));
 	}
 
 	[Test]
-	public void NonEmptyArrayIsFalse()
+	public void InTwoStringsNoMatchReturnsFalse()
 	{
-		var rule = new NotRule(JsonNode.Parse("[1]"));
+		var rule = new InRule("foo", "bar");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+
 		Assert.IsFalse(expression.Compile()(null));
 	}
 
 	[Test]
-	public void EmptyStringIsTrue()
+	public void InStringContainsNumberReturnsTrue()
 	{
-		var rule = new NotRule("");
+		var rule = new InRule(4, "foo4bar");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+
 		Assert.IsTrue(expression.Compile()(null));
 	}
 
 	[Test]
-	public void NonEmptyStringIsFalse()
+	public void InStringContainsBooleanReturnsTrue()
 	{
-		var rule = new NotRule("foo");
+		var rule = new InRule(true, "footruebar");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+
+		Assert.IsTrue(expression.Compile()(null));
+	}
+
+	[Test]
+	public void InStringContainsNullReturnsFalse()
+	{
+		var rule = new InRule(true, "foo");
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+
 		Assert.IsFalse(expression.Compile()(null));
 	}
 
 	[Test]
-	public void ZeroIsTrue()
+	public void InArrayContainsFirstReturnsTrue()
 	{
-		var rule = new NotRule(0);
+		var array = new JsonArray(1, 2, 3);
+		var rule = new InRule(2, array);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+
 		Assert.IsTrue(expression.Compile()(null));
 	}
 
 	[Test]
-	public void NonZeroIsFalse()
+	public void InArrayDoesNotContainFirstReturnsFalse()
 	{
-		var rule = new NotRule(1);
+		var array = new JsonArray(1, 2, 3);
+		var rule = new InRule(5, array);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+
 		Assert.IsFalse(expression.Compile()(null));
 	}
 
 	[Test]
-	public void FalseIsTrue()
+	public void InNullThrowsError()
 	{
-		var rule = new NotRule(false);
+		var rule = new InRule(1, LiteralRule.Null);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
-	}
 
-	[Test]
-	public void TrueIsFalse()
-	{
-		var rule = new NotRule(true);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));
 	}
 
 	[Test]
-	public void NullIsTrue()
+	public void InBooleanThrowsError()
 	{
-		var rule = new NotRule(JsonNode.Parse("null"));
+		var rule = new InRule(1, false);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+
+		Assert.IsFalse(expression.Compile()(null));
+	}
+
+	[Test]
+	public void InNumberThrowsError()
+	{
+		var rule = new InRule(1, 4);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+
+		Assert.IsFalse(expression.Compile()(null));
 	}
 }

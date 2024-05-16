@@ -47,7 +47,7 @@ public class MiscTests
 		
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!, new CreateExpressionOptions
 		{
-			WrapConstants = false,
+			WrapConstants = true,
 		});
 		var func = expression.Compile();
 
@@ -72,7 +72,7 @@ public class MiscTests
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule!, new CreateExpressionOptions
 		{
-			WrapConstants = false,
+			WrapConstants = true,
 		});
 		var func = expression.Compile();
 		
