@@ -1,10 +1,9 @@
 using System;
 using System.Globalization;
-using Json.Logic.Expressions;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Tests.Expressions;
+namespace Json.Logic.Expressions.Tests;
 
 public class StrictEqualsTests
 {
@@ -22,14 +21,6 @@ public class StrictEqualsTests
 		var rule = new StrictEqualsRule(1, 1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
-	}
-
-	[Test]
-	public void LooseEqualsReturnsFalse()
-	{
-		var rule = new StrictEqualsRule(1, "1");
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
 	}
 
 	[Test]

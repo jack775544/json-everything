@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Json.Logic.Expressions;
-using Json.Logic.Expressions.Utility;
 using Json.Logic.Rules;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
-namespace Json.Logic.Tests.Expressions.EfCore;
+namespace Json.Logic.Expressions.Tests.EfCore;
 
 file class TestDatabase : IAsyncDisposable
 {
@@ -100,12 +97,12 @@ public class EfCoreTests
 				""),
 			"");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
-		
-		var departmentCount = await database.DbContext
+
+		// Aggregate is not supported in EF Core
+		Assert.ThrowsAsync<InvalidOperationException>(async () => await database.DbContext
 			.Departments
 			.Where(expression)
-			.CountAsync();
-		Assert.AreEqual(1, departmentCount);
+			.CountAsync());
 	}
 	
 	[Test]

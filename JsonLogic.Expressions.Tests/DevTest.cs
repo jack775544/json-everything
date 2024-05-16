@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace Json.Logic.Tests.Expressions;
+namespace Json.Logic.Expressions.Tests;
 
 public class DevTest
 {

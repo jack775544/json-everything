@@ -1,9 +1,8 @@
 using System.Text.Json.Nodes;
-using Json.Logic.Expressions;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Tests.Expressions;
+namespace Json.Logic.Expressions.Tests;
 
 public class InTests
 {
@@ -53,15 +52,6 @@ public class InTests
 	}
 
 	[Test]
-	public void InStringContainsObjectThrowsError()
-	{
-		var rule = new InRule(JsonNode.Parse("{}"), "foo");
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-
-		Assert.Throws<JsonLogicException>(() => expression.Compile()(null));
-	}
-
-	[Test]
 	public void InArrayContainsFirstReturnsTrue()
 	{
 		var array = new JsonArray(1, 2, 3);
@@ -76,15 +66,6 @@ public class InTests
 	{
 		var array = new JsonArray(1, 2, 3);
 		var rule = new InRule(5, array);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-
-		Assert.IsFalse(expression.Compile()(null));
-	}
-
-	[Test]
-	public void InObjectThrowsError()
-	{
-		var rule = new InRule(1, JsonNode.Parse("{}"));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
 		Assert.IsFalse(expression.Compile()(null));

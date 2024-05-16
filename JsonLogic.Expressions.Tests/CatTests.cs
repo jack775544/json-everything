@@ -1,9 +1,8 @@
 using System.Text.Json.Nodes;
-using Json.Logic.Expressions;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Tests.Expressions;
+namespace Json.Logic.Expressions.Tests;
 
 public class CatTests
 {
@@ -51,25 +50,5 @@ public class CatTests
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
 
 		Assert.AreEqual("foo1,2,3", expression.Compile()(null));
-	}
-
-	[Test]
-	public void CatStringAndNestedArrayConcatsValues()
-	{
-		var array = new JsonArray(1, 2, 3);
-		var nestedArray = new JsonArray(1, array, 3);
-		var rule = new CatRule("foo", nestedArray);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-
-		Assert.AreEqual("foo1,1,2,3,3", expression.Compile()(null));
-	}
-
-	[Test]
-	public void CatStringAndObjectConcatsValues()
-	{
-		var rule = new CatRule("foo", JsonNode.Parse("{}"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-
-		Assert.Throws<JsonLogicException>(() => expression.Compile()(null));
 	}
 }

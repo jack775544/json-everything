@@ -2,10 +2,9 @@
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Json.Logic.Expressions;
 using NUnit.Framework;
 
-namespace Json.Logic.Tests.Expressions;
+namespace Json.Logic.Expressions.Tests;
 
 internal class TestData
 {
@@ -44,7 +43,7 @@ public class MiscTests
 		              ]
 		            }
 		            """;
-		var rule = JsonSerializer.Deserialize<Rule>(logic, TestDataSerializerContext.Default.Rule);
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule);
 		
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!, new CreateExpressionOptions
 		{
@@ -69,7 +68,7 @@ public class MiscTests
 		            { "==": [1, true] }
 		            """;
 
-		var rule = JsonSerializer.Deserialize<Rule>(logic, TestDataSerializerContext.Default.Rule);
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule);
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule!, new CreateExpressionOptions
 		{

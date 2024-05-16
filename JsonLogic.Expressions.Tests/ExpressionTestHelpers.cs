@@ -1,4 +1,4 @@
-﻿namespace Json.Logic.Tests.Expressions;
+﻿namespace Json.Logic.Expressions.Tests;
 
 // public class ExpressionTestHelpers
 // {

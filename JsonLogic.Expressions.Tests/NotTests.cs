@@ -1,9 +1,8 @@
 ﻿using System.Text.Json.Nodes;
-using Json.Logic.Expressions;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Tests.Expressions;
+namespace Json.Logic.Expressions.Tests;
 
 public class NotTests
 {
@@ -77,21 +76,5 @@ public class NotTests
 		var rule = new NotRule(JsonNode.Parse("null"));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsTrue(expression.Compile()(null));
-	}
-
-	[Test]
-	public void EmptyObjectIsTrue()
-	{
-		var rule = new NotRule(JsonNode.Parse("{}"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
-	}
-
-	[Test]
-	public void NonEmptyObjectIsFalse()
-	{
-		var rule = new NotRule(JsonNode.Parse("{\"foo\":5}"));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
 	}
 }

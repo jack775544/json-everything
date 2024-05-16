@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Nodes;
-using Json.Logic.Expressions;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
-namespace Json.Logic.Tests.Expressions;
+namespace Json.Logic.Expressions.Tests;
 
 public class FilterTests
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace Json.Logic.Tests.Expressions.EfCore;
+namespace Json.Logic.Expressions.Tests.EfCore;
 
 public class Department
 {
