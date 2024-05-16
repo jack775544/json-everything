@@ -14,12 +14,6 @@ internal class TestData
 	public DateTime DateField { get; set; }
 }
 
-[JsonSourceGenerationOptions(WriteIndented = true)]
-[JsonSerializable(typeof(Rule))]
-internal partial class TestDataSerializerContext : JsonSerializerContext
-{
-}
-
 public class MiscTests
 {
 	[Test]
