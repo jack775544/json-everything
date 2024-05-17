@@ -19,12 +19,15 @@ public class RuleExpressionRegistry
 	public static RuleExpressionRegistry Current { get; } = new();
 
 	private readonly Dictionary<Type, IRuleExpression> _registry = new();
+	private readonly CreateExpressionOptions _defaultOptions;
 
 	/// <summary>
 	/// Constructs a new rule registry with all built in rules added.
 	/// </summary>
-	public RuleExpressionRegistry()
+	public RuleExpressionRegistry(CreateExpressionOptions? options = null)
 	{
+		_defaultOptions = options ?? new CreateExpressionOptions();
+
 		AddRule<AddRule, AddRuleExpression>();
 		AddRule<AllRule, AllRuleExpression>();
 		AddRule<AndRule, AndRuleExpression>();
@@ -114,10 +117,10 @@ public class RuleExpressionRegistry
 	/// <param name="parameter">An expression to be used as the JSON Logic data.</param>
 	/// <param name="options">Options for creating the expression.</param>
 	/// <returns>An expression body that represents the logic rule.</returns>
-	public Expression CreateExpression(Rule rule, Expression parameter, CreateExpressionOptions options)
+	public Expression CreateExpression(Rule rule, Expression parameter, CreateExpressionOptions? options = null)
 	{
+		options ??= _defaultOptions;
 		var expression = CreateExpressionInternal(rule, parameter, options);
-
 		return options.WrapConstants ? ConstantReplacer.Replace(expression) : expression;
 	}
 
@@ -131,7 +134,7 @@ public class RuleExpressionRegistry
 	public Expression<Func<object?, TReturn>> CreateRuleExpression<TReturn>(Rule rule, CreateExpressionOptions? options = null)
 	{
 		var parameter = Expression.Parameter(typeof(object), "arg");
-		var expression = CreateExpression(rule, parameter, options ?? new CreateExpressionOptions());
+		var expression = CreateExpression(rule, parameter, options ?? _defaultOptions);
 		if (expression.Type == typeof(DataObject))
 		{
 			expression = Expression.PropertyOrField(expression, nameof(DataObject.Field));
@@ -150,7 +153,7 @@ public class RuleExpressionRegistry
 	public Expression<Func<TParam, TReturn>> CreateRuleExpression<TParam, TReturn>(Rule rule, CreateExpressionOptions? options = null)
 	{
 		var parameter = Expression.Parameter(typeof(TParam), "arg");
-		var expression = CreateExpression(rule, parameter, options ?? new CreateExpressionOptions());
+		var expression = CreateExpression(rule, parameter, options ?? _defaultOptions);
 		if (expression.Type == typeof(DataObject))
 		{
 			expression = Expression.PropertyOrField(expression, nameof(DataObject.Field));
