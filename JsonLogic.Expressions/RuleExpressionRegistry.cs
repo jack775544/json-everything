@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Json.Logic.Expressions.Rules;
 using Json.Logic.Expressions.Utility;
-using Json.Logic.Rules;
 
 namespace Json.Logic.Expressions;
 
@@ -18,84 +16,16 @@ public class RuleExpressionRegistry
 	/// </summary>
 	public static RuleExpressionRegistry Current { get; } = new();
 
-	private readonly Dictionary<Type, IRuleExpression> _registry = new();
-	private readonly CreateExpressionOptions _defaultOptions;
+	private readonly Dictionary<Type, IRuleExpression> _registry;
+	private readonly CreateRegistryOptions _defaultOptions;
 
 	/// <summary>
 	/// Constructs a new rule registry with all built in rules added.
 	/// </summary>
-	public RuleExpressionRegistry(CreateExpressionOptions? options = null)
+	public RuleExpressionRegistry(CreateRegistryOptions? options = null)
 	{
-		_defaultOptions = options ?? new CreateExpressionOptions();
-
-		AddRule<AddRule, AddRuleExpression>();
-		AddRule<AllRule, AllRuleExpression>();
-		AddRule<AndRule, AndRuleExpression>();
-		AddRule<BooleanCastRule, BooleanCastRuleExpression>();
-		AddRule<CatRule, CatRuleExpression>();
-		AddRule<DivideRule, DivideRuleExpression>();
-		AddRule<FilterRule, FilterRuleExpression>();
-		AddRule<IfRule, IfRuleExpression>();
-		AddRule<InRule, InRuleExpression>();
-		AddRule<LessThanEqualRule, LessThanEqualRuleExpression>();
-		AddRule<LessThanRule, LessThanRuleExpression>();
-		AddRule<LiteralRule, LiteralRuleExpression>();
-		AddRule<LogRule, LogRuleExpression>();
-		AddRule<LooseEqualsRule, LooseEqualsRuleExpression>();
-		AddRule<LooseNotEqualsRule, LooseNotEqualsRuleExpression>();
-		AddRule<MapRule, MapRuleExpression>();
-		AddRule<MaxRule, MaxRuleExpression>();
-		AddRule<MergeRule, MergeRuleExpression>();
-		AddRule<MinRule, MinRuleExpression>();
-		AddRule<MissingRule, MissingRuleExpression>();
-		AddRule<MissingSomeRule, MissingSomeRuleExpression>();
-		AddRule<ModRule, ModRuleExpression>();
-		AddRule<MoreThanEqualRule, MoreThanEqualRuleExpression>();
-		AddRule<MoreThanRule, MoreThanRuleExpression>();
-		AddRule<MultiplyRule, MultiplyRuleExpression>();
-		AddRule<NoneRule, NoneRuleExpression>();
-		AddRule<NotRule, NotRuleExpression>();
-		AddRule<OrRule, OrRuleExpression>();
-		AddRule<ReduceRule, ReduceRuleExpression>();
-		AddRule<RuleCollection, RuleCollectionExpression>();
-		AddRule<SomeRule, SomeRuleExpression>();
-		AddRule<StrictEqualsRule, StrictEqualsRuleExpression>();
-		AddRule<StrictNotEqualsRule, StrictNotEqualsRuleExpression>();
-		AddRule<SubstrRule, SubstrRuleExpression>();
-		AddRule<SubtractRule, SubtractRuleExpression>();
-		AddRule<VariableRule, VariableRuleExpression>();
-	}
-
-	public void AddRule<TRule, TRuleExpression>()
-		where TRule : Rule
-		where TRuleExpression : RuleExpression<TRule>, new()
-	{
-		AddRule(typeof(TRule), new TRuleExpression());
-	}
-
-	public void AddRule<TRule>(RuleExpression<TRule> ruleExpression) where TRule : Rule
-	{
-		AddRule(typeof(TRule), ruleExpression);
-	}
-
-	public void AddRule<TRule>(IRuleExpression ruleExpression) where TRule : Rule
-	{
-		AddRule(typeof(TRule), ruleExpression);
-	}
-
-	public void AddRule(Type ruleType, IRuleExpression ruleExpression)
-	{
-		_registry[ruleType] = ruleExpression;
-	}
-
-	public void RemoveRule<TRule>() where TRule : Rule
-	{
-		RemoveRule(typeof(TRule));
-	}
-
-	public void RemoveRule(Type ruleType)
-	{
-		_registry.Remove(ruleType);
+		_defaultOptions = options ?? new CreateRegistryOptions();
+		_registry = new Dictionary<Type, IRuleExpression>(_defaultOptions.Registry);
 	}
 
 	/// <summary>
