@@ -28,9 +28,10 @@ public class FilterRuleExpression : RuleExpression<FilterRule>
 
 		var param = Expression.Parameter(type, type.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
+		var args = new[] { input }.Downcast(type);
 		return Expression.Call(
 			_whereMethod.MakeGenericMethod(type),
-			input,
+			args[0],
 			Expression.Lambda(body, param));
 	}
 }

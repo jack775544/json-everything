@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Text.Json.Nodes;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
@@ -46,5 +47,30 @@ public class StrictEqualsTests
 			CultureInfo = culture,
 		});
 		Assert.IsTrue(expression.Compile()(nowLimitedPrecision));
+	}
+
+	public enum Testing
+	{
+		A,
+		B,
+	}
+
+	private record EnumTest(Testing Field, Testing? NullableField);
+
+	[TestCase(nameof(EnumTest.Field), null, "\"A\"", true)]
+	[TestCase(nameof(EnumTest.Field), null, "\"B\"", false)]
+	[TestCase(nameof(EnumTest.NullableField), Testing.B, "\"B\"", true)]
+	[TestCase(nameof(EnumTest.NullableField), Testing.B, "\"A\"", false)]
+	[TestCase(nameof(EnumTest.NullableField), Testing.B, "null", false)]
+	[TestCase(nameof(EnumTest.NullableField), null, "\"A\"", false)]
+	[TestCase(nameof(EnumTest.NullableField), null, "null", true)]
+	public void EnumEquals(string compareField, Testing? nullableField, string comparator, bool expected)
+	{
+		var record = new EnumTest(Testing.A, nullableField);
+		var rule = new StrictEqualsRule(
+			new VariableRule(compareField),
+			new LiteralRule(JsonNode.Parse(comparator)));
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<EnumTest, bool>(rule);
+		Assert.AreEqual(expected, expression.Compile()(record));
 	}
 }

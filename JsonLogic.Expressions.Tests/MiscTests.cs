@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using NUnit.Framework;
 
 namespace Json.Logic.Expressions.Tests;
@@ -12,6 +12,8 @@ internal class TestData
 	public double DoubleField { get; set; }
 	public string? StringField { get; set; }
 	public DateTime DateField { get; set; }
+	public DateTime UtcDateField { get; set; }
+	public DateOnly DateOnlyField { get; set; }
 }
 
 public class MiscTests
@@ -38,7 +40,7 @@ public class MiscTests
 		            }
 		            """;
 		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule);
-		
+
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!, new CreateExpressionOptions
 		{
 			WrapConstants = true,
@@ -52,6 +54,35 @@ public class MiscTests
 		};
 
 		Assert.DoesNotThrow(() => data.Where(x => func(x)).ToList());
+	}
+
+	[Test]
+	public void TestMultiTypeEquals()
+	{
+		// language=JSON
+		var logic = """
+		            {
+		            	"and": [
+		            		{ "==": ["1", {"var": ["StringField"]}] },
+		            		{ "==": ["1", [1, 2, 3]] },
+		            		{ "==": ["1", null] },
+		            		{ "==": ["1", true] },
+		            		{ "==": [[1, 2, 3], {"var": ["StringField"]}] }
+		            	]
+		            }
+		            """;
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule);
+
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!);
+		var func = expression.Compile();
+
+		var data = new TestData[]
+		{
+			new TestData(),
+			new TestData(),
+		};
+
+		Assert.IsEmpty(data.Where(x => func(x)).ToList());
 	}
 
 	[TestCase]
@@ -69,7 +100,111 @@ public class MiscTests
 			WrapConstants = true,
 		});
 		var func = expression.Compile();
-		
+
 		Assert.AreEqual(true, func(null));
+	}
+
+	[TestCase]
+	public void DateFilterWorks()
+	{
+		// language=JSON
+		var logic = """
+		            {
+		                "and": [
+		                    {
+		                        "<=": ["2020-01-01T04:24:41.835Z", { "var": ["DateField"] }]
+		                    },
+		                    {
+		                        ">=": ["2021-02-25T06:32:19.123Z", { "var": ["DateField"] }]
+		                    }
+		                ]
+		            }
+		            """;
+
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule);
+
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
+		var func = expression.Compile();
+
+		var data = new TestData[]
+		{
+			new TestData { DateField = new DateTime(2020, 4, 4) },
+			new TestData { DateField = new DateTime(2021, 4, 4) },
+			new TestData { DateField = new DateTime(2020, 5, 4) },
+		};
+
+		var results = data.Where(func).ToList();
+		Assert.AreEqual(2, results.Count);
+	}
+	
+	[TestCase]
+	public void DateOnlyFilterWorks()
+	{
+		// language=JSON
+		var logic = """
+		            {
+		                "and": [
+		                    {
+		                        "<=": ["2020-01-01", { "var": ["DateOnlyField"] }]
+		                    },
+		                    {
+		                        ">=": ["2021-02-25", { "var": ["DateOnlyField"] }]
+		                    }
+		                ]
+		            }
+		            """;
+
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule);
+
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
+		var func = expression.Compile();
+
+		var data = new TestData[]
+		{
+			new TestData { DateOnlyField = new(2020, 4, 4) },
+			new TestData { DateOnlyField = new(2021, 4, 4) },
+			new TestData { DateOnlyField = new(2020, 5, 4) },
+		};
+
+		var results = data.Where(func).ToList();
+		Assert.AreEqual(2, results.Count);
+	}
+	
+	[TestCase("2020-01-01T00:00:00Z", DateTimeKind.Utc)]
+	[TestCase("2020-01-01T00:00:00", DateTimeKind.Unspecified)]
+	public void UtcConversionWorks(string input, DateTimeKind kind)
+	{
+		// language=JSON
+		var logic = $$"""
+		            {
+		                "<=": ["{{input}}", { "var": ["UtcDateField"] }]
+		            }
+		            """;
+
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule);
+
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData, bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
+		// .ConfigureProperty<TestData, DateTime>(x => x.UtcDateField, x => x.ParseStyle(DateTimeStyles.AdjustToUniversal)));
+
+		// Yikes, don't really want to write a visitor just for this test though
+		var dateTime = (DateTime)((ConstantExpression)((BinaryExpression)expression.Body).Left).Value!;
+		Assert.AreEqual(kind, dateTime.Kind);
+
+		// var data = new TestData[]
+		// {
+		// 	new TestData(),
+		// };
+		//
+		// var results = data.Where(func).ToList();
+		// Assert.AreEqual(2, results.Count);
 	}
 }

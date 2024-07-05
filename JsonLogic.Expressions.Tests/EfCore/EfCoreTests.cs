@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Json.Logic.Rules;
 using Microsoft.Data.Sqlite;
@@ -37,7 +38,7 @@ file class TestDatabase : IAsyncDisposable
 				Id = 1,
 				Name = "Reporting",
 				Employees = [
-					new Employee { Id = 1, Name = "Alice", DateOfBirth = new DateTime(1990, 1, 1), Height = 175.5, Salary = 10000m, NumberOfChildren = 1 },
+					new Employee { Id = 1, Name = "Alice", DateOfBirth = new DateTime(1990, 1, 1), Height = 175.5, Salary = 10000m, NumberOfChildren = 1, EmploymentType = EmploymentType.Casual},
 					new Employee { Id = 2, Name = "Bob", DateOfBirth = new DateTime(1995, 5, 5), Height = 170, Salary = 15000m, NumberOfChildren = 2 },
 				]
 			},
@@ -46,7 +47,7 @@ file class TestDatabase : IAsyncDisposable
 				Id = 2,
 				Name = "Management",
 				Employees = [
-					new Employee { Id = 4, Name = "Jane", DateOfBirth = new DateTime(1994, 4, 4), Height = 165.6, Salary = 20000.50m, NumberOfChildren = 3 },
+					new Employee { Id = 4, Name = "Jane", DateOfBirth = new DateTime(1994, 4, 4), Height = 165.6, Salary = 20000.50m, NumberOfChildren = 3, EmploymentType = EmploymentType.PartTime},
 				]
 			},
 			new Department
@@ -54,9 +55,9 @@ file class TestDatabase : IAsyncDisposable
 				Id = 3,
 				Name = "HR",
 				Employees = [
-					new Employee { Id = 5, Name = "John", DateOfBirth = new DateTime(2002, 2, 2), Height = 160, Salary = 30000m, NumberOfChildren = 4 },
-					new Employee { Id = 6, Name = "Alice", DateOfBirth = new DateTime(1996, 6, 6), Height = 162.2, Salary = 350000m, NumberOfChildren = 5 },
-					new Employee { Id = 7, Name = "Tom", DateOfBirth = new DateTime(1997, 7, 7), Height = 190.1, Salary = 40000m, NumberOfChildren = 6 },
+					new Employee { Id = 5, Name = "John", DateOfBirth = new DateTime(2002, 2, 2), Height = 160, Salary = 30000m, NumberOfChildren = 4, EmploymentType = EmploymentType.FullTime},
+					new Employee { Id = 6, Name = "Alice", DateOfBirth = new DateTime(1996, 6, 6), Height = 162.2, Salary = 350000m, NumberOfChildren = 5, EmploymentType = EmploymentType.FullTime},
+					new Employee { Id = 7, Name = "Tom", DateOfBirth = new DateTime(1997, 7, 7), Height = 190.1, Salary = 40000m, NumberOfChildren = 6, Status = EmploymentStatus.Former},
 				]
 			});
 
@@ -119,6 +120,54 @@ public class EfCoreTests
 			.Where(expression)
 			.CountAsync();
 		Assert.AreEqual(1, departmentCount);
+	}
+	
+	[Test]
+	public async Task EqualsEnum()
+	{
+		await using var database = new TestDatabase();
+		await database.InitialiseAsync();
+
+		var rule = new StrictEqualsRule(new VariableRule("Status"), "Current");
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, bool>(rule, _options);
+		
+		var departmentCount = await database.DbContext
+			.Employees
+			.Where(expression)
+			.CountAsync();
+		Assert.AreEqual(5, departmentCount);
+	}
+	
+	[Test]
+	public async Task EqualsNullableEnum()
+	{
+		await using var database = new TestDatabase();
+		await database.InitialiseAsync();
+
+		var rule = new StrictEqualsRule(new VariableRule("EmploymentType"), "FullTime");
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, bool>(rule, _options);
+		
+		var departmentCount = await database.DbContext
+			.Employees
+			.Where(expression)
+			.CountAsync();
+		Assert.AreEqual(2, departmentCount);
+	}
+	
+	[Test]
+	public async Task NullEqualsNullableEnum()
+	{
+		await using var database = new TestDatabase();
+		await database.InitialiseAsync();
+
+		var rule = new StrictEqualsRule(new VariableRule("EmploymentType"), new LiteralRule(null));
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, bool>(rule, _options);
+		
+		var departmentCount = await database.DbContext
+			.Employees
+			.Where(expression)
+			.CountAsync();
+		Assert.AreEqual(2, departmentCount);
 	}
 
 	[Test]
@@ -309,5 +358,38 @@ public class EfCoreTests
 			.OrderBy(expression)
 			.ToListAsync();
 		Assert.AreEqual(6, employees.Count);
+	}
+
+	[Test]
+	public async Task InArray()
+	{
+		await using var database = new TestDatabase();
+		await database.InitialiseAsync();
+
+		var array = new JsonArray("1", "3");
+		var rule = new InRule(new VariableRule("Id"), array);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
+
+		var employees = await database.DbContext
+			.Departments
+			.Where(expression)
+			.ToListAsync();
+		Assert.AreEqual(2, employees.Count);
+	}
+	
+	[Test]
+	public async Task InMappedArray()
+	{
+		await using var database = new TestDatabase();
+		await database.InitialiseAsync();
+
+		var rule = new InRule(1, new MapRule(new VariableRule("Employees"), new VariableRule("Id")));
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Department, bool>(rule, _options);
+
+		var employees = await database.DbContext
+			.Departments
+			.Where(expression)
+			.ToListAsync();
+		Assert.AreEqual(1, employees.Count);
 	}
 }

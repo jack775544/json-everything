@@ -41,7 +41,7 @@ public class DivergenceTests
 		var array = new JsonArray(1, 2, 3);
 		var nestedArray = new JsonArray(1, array, 3);
 		var rule = new CatRule("foo", nestedArray);
-		Assert.Throws<InvalidOperationException>(() => RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule));
+		Assert.Throws<JsonLogicException>(() => RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule));
 	}
 
 	/// <summary>

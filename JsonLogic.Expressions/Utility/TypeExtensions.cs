@@ -33,6 +33,21 @@ internal static class TypeExtensions
 			return true;
 		}
 
+		if (type.IsGenericType)
+		{
+			if (type.GetGenericTypeDefinition() == typeof(DataArray<>))
+			{
+				genericType = type.GenericTypeArguments[0];
+				return true;
+			}
+
+			if (type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+			{
+				genericType = type.GenericTypeArguments[0];
+				return true;
+			}
+		}
+
 		genericType = type
 			.GetInterfaces()
 			.Where(x => x.IsGenericType)

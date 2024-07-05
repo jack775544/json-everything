@@ -9,11 +9,18 @@ internal class DataObjectReplacer(Type? desiredType, DataObject? nullCast = null
 	{
 		if (node.Value == null)
 		{
-			node = Expression.Constant(nullCast);
+			if (node.Type == typeof(object) && desiredType != null && desiredType.IsGenericType && desiredType.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				node = Expression.Constant(nullCast, desiredType);
+			}
+			else
+			{
+				node = Expression.Constant(nullCast);
+			}
 		}
 
 		// All data objects will be found in constants
-		if (node.Type != typeof(DataObject))
+		if (!typeof(DataObject).IsAssignableFrom(node.Type))
 		{
 			return node;
 		}

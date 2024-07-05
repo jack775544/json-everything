@@ -25,9 +25,12 @@ public class AllRuleExpression : RuleExpression<AllRule>
 
 		var param = Expression.Parameter(paramType, paramType.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
+
+		var args = new[] { input }.Downcast(paramType);
+		
 		return Expression.Call(
 			_allMethod.MakeGenericMethod(paramType),
-			input,
+			args[0],
 			Expression.Lambda(body, param));
 	}
 }

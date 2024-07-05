@@ -11,8 +11,14 @@ internal class DataObjectTypeInspector : ExpressionVisitor
 
 	protected override Expression VisitConstant(ConstantExpression node)
 	{
-		if (node.Type != typeof(DataObject) || node.Value == null)
+		if (!typeof(DataObject).IsAssignableFrom(node.Type) || node.Value == null)
 		{
+			return node;
+		}
+
+		if (node.Type.IsGenericType && node.Type.GetGenericTypeDefinition() == typeof(DataArray<>))
+		{
+			DiscoveredTypes.Add(node.Type.GetGenericArguments()[0]);
 			return node;
 		}
 

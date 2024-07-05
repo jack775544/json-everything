@@ -28,9 +28,10 @@ public class NoneRuleExpression : RuleExpression<NoneRule>
 
 		var param = Expression.Parameter(type, type.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
+		var args = new[] { input }.Downcast(type);
 		return Expression.Not(Expression.Call(
 			_anyMethod.MakeGenericMethod(type),
-			input,
+			args[0],
 			Expression.Lambda(body, param)));
 	}
 }

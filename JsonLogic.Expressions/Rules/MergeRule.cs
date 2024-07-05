@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 using Json.Logic.Expressions.Utility;
 using Json.Logic.Rules;
-using Json.More;
 
 namespace Json.Logic.Expressions.Rules;
 

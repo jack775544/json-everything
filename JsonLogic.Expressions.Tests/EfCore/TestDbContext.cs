@@ -11,6 +11,19 @@ public class Department
 	public required ICollection<Employee> Employees { get; set; }
 }
 
+public enum EmploymentStatus
+{
+	Current,
+	Former,
+}
+
+public enum EmploymentType
+{
+	FullTime,
+	PartTime,
+	Casual,
+}
+
 public class Employee
 {
 	public required int Id { get; set; }
@@ -19,6 +32,8 @@ public class Employee
 	public required decimal Salary { get; set; }
 	public required double Height { get; set; }
 	public required int NumberOfChildren { get; set; }
+	public EmploymentStatus Status { get; set; } = EmploymentStatus.Current;
+	public EmploymentType? EmploymentType { get; set; }
 
 	public int DepartmentId { get; set; }
 	public Department? Department { get; set; }

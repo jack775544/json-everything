@@ -34,9 +34,10 @@ public class MapRuleExpression : RuleExpression<MapRule>
 
 		var param = Expression.Parameter(type, type.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
+		var args = new[] { input }.Downcast(type);
 		return Expression.Call(
 			_selectMethod.MakeGenericMethod(type, body.Type),
-			input,
+			args[0],
 			Expression.Lambda(body, param));
 	}
 }

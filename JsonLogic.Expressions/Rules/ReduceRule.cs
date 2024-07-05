@@ -40,9 +40,11 @@ public class ReduceRuleExpression : RuleExpression<ReduceRule>
 				new(stateType, stateType.GetMember(nameof(ReduceState<object, object>.Current)).First(), currentParam)
 			});
 
+		var args = new[] { input }.Downcast(collectionType);
+
 		return Expression.Call(
 			_aggregateMethod.MakeGenericMethod(collectionType, initial.Type),
-			input,
+			args[0],
 			initial,
 			Expression.Lambda(body, accumulatorParam, currentParam));
 	}

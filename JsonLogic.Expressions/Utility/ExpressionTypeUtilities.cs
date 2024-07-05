@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -50,6 +51,7 @@ internal static class ExpressionTypeUtilities
 		{ typeof(double), static data => data.AsDouble() },
 		{ typeof(float), static data => data.AsFloat() },
 		{ typeof(decimal), static data => data.AsDecimal() },
+		{ typeof(object), static data => Expression.Constant(data.Field) }
 	};
 
 	public static List<Expression> Downcast(this IEnumerable<Expression> expressions, Type? desiredType = null)
@@ -70,7 +72,7 @@ internal static class ExpressionTypeUtilities
 		var visitor = new DataObjectReplacer(mostCommonType, new DataObject(0, new CreateExpressionOptions()));
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
-	
+
 	public static List<Expression> DowncastComparable(this IEnumerable<Expression> expressions)
 	{
 		var expressionList = expressions.ToList();
@@ -138,7 +140,7 @@ internal static class ExpressionTypeUtilities
 	private static Type GetDesiredType(List<Expression> expressions, List<Type> typeHierarchy)
 	{
 		// If something is explicitly declaring its type, then use it.
-		var desiredType = expressions.Select(x => x.Type).FirstOrDefault(x => x != typeof(DataObject));
+		var desiredType = expressions.Select(x => x.Type).FirstOrDefault(x => !typeof(DataObject).IsAssignableFrom(x));
 		if (desiredType != null && desiredType != typeof(object))
 		{
 			return desiredType;
@@ -151,7 +153,12 @@ internal static class ExpressionTypeUtilities
 		var mostCommonType = discoveredTypes.MaxBy(x => _typeHierarchy.IndexOf(x)) ?? typeof(string);
 		return mostCommonType;
 	}
-	
+
+	private class NullableBox<T>(T? field) where T : struct
+	{
+		public T? Field { get; set; } = field;
+	}
+
 	public static Expression DataObjectToExpression(DataObject dataObject, Type convertTo)
 	{
 		var isArray = false;
@@ -168,6 +175,34 @@ internal static class ExpressionTypeUtilities
 			isNullable = true;
 		}
 
+		if (convertTo.IsEnum && dataObject.Field != null)
+		{
+			string enumValue;
+
+			if (dataObject.Field is string stringField)
+			{
+				enumValue = stringField;
+			}
+			else
+			{
+				enumValue = dataObject.Field.ToString()!;
+			}
+
+			return !isNullable
+				? Expression.Constant(Enum.Parse(convertTo, enumValue))
+				: Expression.PropertyOrField(Expression.Constant(typeof(NullableBox<>)
+					.MakeGenericType(convertTo)
+					.GetConstructors()
+					.Single()
+					// .Single(x => x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType == convertTo)
+					.Invoke([Enum.Parse(convertTo, enumValue)])), nameof(NullableBox<int>.Field));
+		}
+
+		if (convertTo != typeof(string) && typeof(IEnumerable).IsAssignableFrom(convertTo) && convertTo.TryGetGenericCollectionType(out var tempConvertTo))
+		{
+			convertTo = tempConvertTo;
+		}
+
 		var result = DataObjectConverters.TryGetValue(convertTo, out var converter)
 			? converter(dataObject)
 			: throw new InvalidOperationException($"Could not find converter to convert {dataObject.Field} to {convertTo.FullName}");
@@ -178,7 +213,9 @@ internal static class ExpressionTypeUtilities
 		}
 
 		return isArray
-			? Expression.NewArrayInit(convertTo, result)
+			? result is NewArrayExpression
+				? result
+				: Expression.NewArrayInit(convertTo, result.Type.IsValueType ? Expression.Convert(result, typeof(object)) : result)
 			: result;
 	}
 }
