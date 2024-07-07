@@ -53,20 +53,9 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 			: null;
 	}
 
-	public Expression? AsDateTime() 
-	{
-		if (Field is not string stringField)
-		{
-			return null;
-		}
-
-		return DateTime.TryParse(stringField, options.CultureInfo, DateTimeStyles.AdjustToUniversal, out var dateOnly)
-			? ExpressionUtilities.CreateConstant(dateOnly, false, options)
-			: null;
-	}
-
-	public Expression? AsDateOnly() => AsDateLike<DateOnly>(DateOnly.TryParse);
-	public Expression? AsTimeOnly() => AsDateLike<TimeOnly>(TimeOnly.TryParse);
+	public Expression? AsDateTime() => AsDateLike<DateTime>(DateTime.TryParse, DateTimeStyles.AdjustToUniversal);
+	public Expression? AsDateOnly() => AsDateLike<DateOnly>(DateOnly.TryParse, DateTimeStyles.None);
+	public Expression? AsTimeOnly() => AsDateLike<TimeOnly>(TimeOnly.TryParse, DateTimeStyles.None);
 
 	public Expression? AsInt() => Field switch
 	{
@@ -199,15 +188,15 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 
 	private delegate bool DateParser<T>(string str, IFormatProvider formatProvider, DateTimeStyles styles, out T result);
 
-	private Expression? AsDateLike<T>(DateParser<T> parser)
+	private Expression? AsDateLike<T>(DateParser<T> parser, DateTimeStyles style)
 	{
 		if (Field is not string stringField)
 		{
 			return null;
 		}
 
-		return parser(stringField, options.CultureInfo, DateTimeStyles.None, out var dateOnly)
-			? ExpressionUtilities.CreateConstant(dateOnly, false, options)
+		return parser(stringField, options.CultureInfo, style, out var dateLike)
+			? ExpressionUtilities.CreateConstant(dateLike, false, options)
 			: null;
 	}
 }
