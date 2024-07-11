@@ -24,6 +24,7 @@ internal static class ExpressionTypeUtilities
 		typeof(TimeOnly),
 		typeof(DateOnly),
 		typeof(DateTime),
+		typeof(DateTimeOffset),
 		.._numberTypeHierarchy,
 	];
 
@@ -32,26 +33,29 @@ internal static class ExpressionTypeUtilities
 	[
 		typeof(bool),
 		.._comparableTypeHierarchy,
+		typeof(TimeSpan),
 		typeof(Guid),
 		typeof(string),
 	];
 
-	public static readonly Dictionary<Type, Func<DataObject, Expression?>> DataObjectConverters = new()
+	public static readonly Dictionary<Type, Func<DataObject, bool, Expression?>> DataObjectConverters = new()
 	{
-		{ typeof(string), static data => data.AsString() },
-		{ typeof(Guid), static data => data.AsGuid() },
-		{ typeof(DateTime), static data => data.AsDateTime() },
-		{ typeof(DateOnly), static data => data.AsDateOnly() },
-		{ typeof(TimeOnly), static data => data.AsTimeOnly() },
-		{ typeof(bool), static data => data.AsBool() },
-		{ typeof(int), static data => data.AsInt() },
-		{ typeof(long), static data => data.AsLong() },
-		{ typeof(short), static data => data.AsShort() },
-		{ typeof(byte), static data => data.AsByte() },
-		{ typeof(double), static data => data.AsDouble() },
-		{ typeof(float), static data => data.AsFloat() },
-		{ typeof(decimal), static data => data.AsDecimal() },
-		{ typeof(object), static data => Expression.Constant(data.Field) }
+		{ typeof(string), static (data, _) => data.AsString() },
+		{ typeof(Guid), static (data, nullable) => data.AsGuid(nullable) },
+		{ typeof(DateTime), static (data, nullable) => data.AsDateTime(nullable) },
+		{ typeof(DateOnly), static (data, nullable) => data.AsDateOnly(nullable) },
+		{ typeof(TimeOnly), static (data, nullable) => data.AsTimeOnly(nullable) },
+		{ typeof(DateTimeOffset), static (data, nullable) => data.AsDateTimeOffset(nullable) },
+		{ typeof(TimeSpan), static (data, nullable) => data.AsTimeSpan(nullable) },
+		{ typeof(bool), static (data, nullable) => data.AsBool(nullable) },
+		{ typeof(int), static (data, nullable) => data.AsInt(nullable) },
+		{ typeof(long), static (data, nullable) => data.AsLong(nullable) },
+		{ typeof(short), static (data, nullable) => data.AsShort(nullable) },
+		{ typeof(byte), static (data, nullable) => data.AsByte(nullable) },
+		{ typeof(double), static (data, nullable) => data.AsDouble(nullable) },
+		{ typeof(float), static (data, nullable) => data.AsFloat(nullable) },
+		{ typeof(decimal), static (data, nullable) => data.AsDecimal(nullable) },
+		{ typeof(object), static (data, _) => Expression.Constant(data.Field) }
 	};
 
 	public static List<Expression> Downcast(this IEnumerable<Expression> expressions, Type? desiredType = null)
@@ -204,7 +208,7 @@ internal static class ExpressionTypeUtilities
 		}
 
 		var result = DataObjectConverters.TryGetValue(convertTo, out var converter)
-			? converter(dataObject)
+			? converter(dataObject, isNullable)
 			: throw new InvalidOperationException($"Could not find converter to convert {dataObject.Field} to {convertTo.FullName}");
 
 		if (result == null)

@@ -35,6 +35,25 @@ public class StrictEqualsTests
 	}
 
 	[Test]
+	public void DateTimeOffsetEqualsReturnsTrue()
+	{
+		var now = DateTimeOffset.UtcNow;
+		var nowLimitedPrecision = new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, TimeSpan.Zero);
+		var rule = new StrictEqualsRule(nowLimitedPrecision.ToString("o"), new VariableRule(""));
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<DateTimeOffset, bool>(rule);
+		Assert.IsTrue(expression.Compile()(nowLimitedPrecision));
+	}
+	
+	[Test]
+	public void TimeSpanEqualsReturnsTrue()
+	{
+		var timeSpan = TimeSpan.FromDays(1);
+		var rule = new StrictEqualsRule(timeSpan.ToString("c"), new VariableRule(""));
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TimeSpan, bool>(rule);
+		Assert.IsTrue(expression.Compile()(timeSpan));
+	}
+
+	[Test]
 	public void CulturedDateTimeEqualsReturnsTrue()
 	{
 		var culture = CultureInfo.GetCultureInfo("en-AU");

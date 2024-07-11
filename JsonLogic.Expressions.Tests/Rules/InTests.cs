@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json.Nodes;
 using Json.Logic.Rules;
 using NUnit.Framework;
@@ -96,5 +97,31 @@ public class InTests
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
 		Assert.IsFalse(expression.Compile()(null));
+	}
+
+	private record InTestData<T>(T Data);
+
+	[Test]
+	public void GuidArrayContainsString() => InTestLogic(Guid.NewGuid(), Guid.NewGuid(), guid => guid.ToString());
+	[Test]
+	public void NullableGuidArrayContainsString() => InTestLogic<Guid?>(Guid.NewGuid(), Guid.NewGuid(), guid => guid?.ToString());
+	[Test]
+	public void DateTimeArrayContainsString() => InTestLogic(DateTime.UtcNow.Date, DateTime.UtcNow.Date.AddDays(1), dt => dt.ToString("O"));
+	[Test]
+	public void NullableDateTimeArrayContainsString() => InTestLogic<DateTime?>(DateTime.UtcNow.Date, DateTime.UtcNow.Date.AddDays(1), dt => dt?.ToString("O"));
+	[Test]
+	public void NullableIntArrayContainsString() => InTestLogic<int?>(1, 2, i => i?.ToString());
+	[Test]
+	public void NullableBoolArrayContainsString() => InTestLogic<bool?>(true, null, b => b);
+
+	private void InTestLogic<T>(T value1, T value2, Func<T, JsonNode?> transformer)
+	{
+		var rule = new InRule(
+			new VariableRule(nameof(InTestData<T>.Data)),
+			new JsonArray(transformer(value1), transformer(value2)));
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<InTestData<T>, bool>(rule);
+
+		Assert.IsTrue(expression.Compile()(new InTestData<T>(value1)));
+		Assert.IsTrue(expression.Compile()(new InTestData<T>(value2)));
 	}
 }

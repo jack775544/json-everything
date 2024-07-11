@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using NUnit.Framework;
 
 namespace Json.Logic.Expressions.Tests;
@@ -206,5 +208,42 @@ public class MiscTests
 		//
 		// var results = data.Where(func).ToList();
 		// Assert.AreEqual(2, results.Count);
+	}
+
+	private record InIdTestData(Guid? Id);
+
+	[Test]
+	public void InId()
+	{
+		// language=JSON
+		var logic = """
+			{
+			    "in": [
+			        {"var": ["Id"]},
+			        [
+			            "000dc3ee-fa94-4b79-8d88-054262f71cf2",
+			            "00e6cf79-1055-446a-a116-09cfc001ec3a"
+			        ]
+			    ]
+			}
+			""";
+
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule)!;
+		
+		// Make sure the rule works with regular JSON logic
+		var a = rule.Apply(new JsonObject(new Dictionary<string, JsonNode?> { ["Id"] = "000dc3ee-fa94-4b79-8d88-054262f71cf2" }))!;
+		var b = rule.Apply(new JsonObject(new Dictionary<string, JsonNode?> { ["Id"] = "000dc3ee-fa94-4b79-8d88-054262f71cf3" }))!;
+		Assert.IsTrue(a.GetValue<bool>());
+		Assert.IsFalse(b.GetValue<bool>());
+
+		// Now try expressions
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<InIdTestData, bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
+		var func = expression.Compile();
+
+		Assert.IsTrue(func(new InIdTestData(Guid.Parse("000dc3ee-fa94-4b79-8d88-054262f71cf2"))));
+		Assert.IsFalse(func(new InIdTestData(Guid.Parse("000dc3ee-fa94-4b79-8d88-054262f71cf3"))));
 	}
 }

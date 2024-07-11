@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Json.Logic.Expressions.Rules;
 
@@ -13,174 +14,219 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 
 	public Expression? AsString() => Field switch
 	{
-		string field => ExpressionUtilities.CreateConstant(field, false, options),
-		int field => ExpressionUtilities.CreateConstant(field.ToString(options.CultureInfo), false, options),
-		long field => ExpressionUtilities.CreateConstant(field.ToString(options.CultureInfo), false, options),
-		short field => ExpressionUtilities.CreateConstant(field.ToString(options.CultureInfo), false, options),
-		byte field => ExpressionUtilities.CreateConstant(field.ToString(options.CultureInfo), false, options),
-		double field => ExpressionUtilities.CreateConstant(field.ToString(options.CultureInfo), false, options),
-		float field => ExpressionUtilities.CreateConstant(field.ToString(options.CultureInfo), false, options),
-		decimal field => ExpressionUtilities.CreateConstant(field.ToString(options.CultureInfo), false, options),
-		bool field => ExpressionUtilities.CreateConstant(field ? "true" : "false", false, options),
+		string field => Expression.Constant(field, typeof(string)),
+		int field => Expression.Constant(field.ToString(options.CultureInfo), typeof(string)),
+		long field => Expression.Constant(field.ToString(options.CultureInfo), typeof(string)),
+		short field => Expression.Constant(field.ToString(options.CultureInfo), typeof(string)),
+		byte field => Expression.Constant(field.ToString(options.CultureInfo), typeof(string)),
+		double field => Expression.Constant(field.ToString(options.CultureInfo), typeof(string)),
+		float field => Expression.Constant(field.ToString(options.CultureInfo), typeof(string)),
+		decimal field => Expression.Constant(field.ToString(options.CultureInfo), typeof(string)),
+		bool field => Expression.Constant(field ? "true" : "false", typeof(string)),
 		JsonArray field => Expression.NewArrayInit(typeof(string), field.Select(x => LiteralRuleExpression.JsonNodeToExpression(x.Stringify(), null, options, false))),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(int).FullName}")
 	};
 
-	public Expression? AsBool() => Field switch
+	public Expression? AsBool(bool nullable) => Field switch
 	{
-		string field => ExpressionUtilities.CreateConstant(!string.IsNullOrEmpty(field), false, options),
-		int field => ExpressionUtilities.CreateConstant(field != 0, false, options),
-		long field => ExpressionUtilities.CreateConstant(field != 0, false, options),
-		short field => ExpressionUtilities.CreateConstant(field != 0, false, options),
-		byte field => ExpressionUtilities.CreateConstant(field != 0, false, options),
-		double field => ExpressionUtilities.CreateConstant(field != 0, false, options),
-		float field => ExpressionUtilities.CreateConstant(field != 0, false, options),
-		decimal field => ExpressionUtilities.CreateConstant(field != 0, false, options),
-		bool field => ExpressionUtilities.CreateConstant(field, false, options),
-		JsonArray field => Expression.NewArrayInit(typeof(bool), field.Select(x => LiteralRuleExpression.JsonNodeToExpression(x.IsTruthy(), null, options, false))),
+		string field => CreateValueConstant(!string.IsNullOrEmpty(field), nullable),
+		int field => CreateValueConstant(field != 0, nullable),
+		long field => CreateValueConstant(field != 0, nullable),
+		short field => CreateValueConstant(field != 0, nullable),
+		byte field => CreateValueConstant(field != 0, nullable),
+		double field => CreateValueConstant(field != 0, nullable),
+		float field => CreateValueConstant(field != 0, nullable),
+		decimal field => CreateValueConstant(field != 0, nullable),
+		bool field => CreateValueConstant(field, nullable),
+		JsonArray field => Expression.NewArrayInit(
+			nullable ? typeof(bool?) : typeof(bool),
+			field.Select(x =>
+			{
+				var type = nullable ? typeof(bool?) : typeof(bool);
+
+				if (x != null && x.GetValueKind() != JsonValueKind.Null)
+				{
+					return Expression.Constant(x.IsTruthy(), type);
+				}
+
+				if (!nullable)
+				{
+					throw new Exception("Null found when trying to construct non null boolean array");
+				}
+
+				return Expression.Constant(null, type);
+			})),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(int).FullName}")
 	};
 
-	public Expression? AsGuid()
+	public Expression? AsGuid(bool nullable)
 	{
-		if (Field is not string stringField)
+		if (Field is string stringField)
 		{
-			return null;
+			return Guid.TryParse(stringField, out var guid)
+				// ? ExpressionUtilities.CreateConstant(guid, false, options)
+				? CreateValueConstant(guid, nullable)
+				: null;
 		}
 
-		return Guid.TryParse(stringField, out var guid)
-			? ExpressionUtilities.CreateConstant(guid, false, options)
-			: null;
+		if (Field is JsonArray arrayField)
+		{
+			if (nullable)
+			{
+				return Expression.NewArrayInit(typeof(Guid?), arrayField
+					.Select(x => x.Stringify())
+					.Select(x => string.IsNullOrWhiteSpace(x) ? null : Guid.Parse(x) as Guid?)
+					.Select(x => Expression.Constant(x, typeof(Guid?))));
+			}
+
+			return Expression.NewArrayInit(typeof(Guid), arrayField
+				.Select(x => x.Stringify())
+				.Select(Guid.Parse!)
+				.Select(x => Expression.Constant(x)));
+		}
+
+		return null;
 	}
 
-	public Expression? AsDateTime() => AsDateLike<DateTime>(DateTime.TryParse, DateTimeStyles.AdjustToUniversal);
-	public Expression? AsDateOnly() => AsDateLike<DateOnly>(DateOnly.TryParse, DateTimeStyles.None);
-	public Expression? AsTimeOnly() => AsDateLike<TimeOnly>(TimeOnly.TryParse, DateTimeStyles.None);
+	public Expression? AsDateTime(bool nullable) => AsDateLike<DateTime>(DateTime.TryParse, DateTimeStyles.AdjustToUniversal, nullable);
+	public Expression? AsDateOnly(bool nullable) => AsDateLike<DateOnly>(DateOnly.TryParse, DateTimeStyles.None, nullable);
+	public Expression? AsTimeOnly(bool nullable) => AsDateLike<TimeOnly>(TimeOnly.TryParse, DateTimeStyles.None, nullable);
+	public Expression? AsDateTimeOffset(bool nullable) => AsDateLike<DateTimeOffset>(DateTimeOffset.TryParse, DateTimeStyles.AdjustToUniversal, nullable);
+	public Expression? AsTimeSpan(bool nullable) => AsDateLike<TimeSpan>(
+		(string str, IFormatProvider provider, DateTimeStyles _, out TimeSpan result) => TimeSpan.TryParse(str, provider, out result),
+		DateTimeStyles.None,
+		nullable);
 
-	public Expression? AsInt() => Field switch
+	public Expression? AsInt(bool nullable) => Field switch
 	{
-		string => AsNumber<string, int>(Field, Convert.ToInt32, int.TryParse),
-		int => AsNumber<int, int>(Field, Convert.ToInt32, int.TryParse),
-		long => AsNumber<long, int>(Field, Convert.ToInt32, int.TryParse),
-		short => AsNumber<short, int>(Field, Convert.ToInt32, int.TryParse),
-		byte => AsNumber<byte, int>(Field, Convert.ToInt32, int.TryParse),
-		double => AsNumber<double, int>(Field, Convert.ToInt32, int.TryParse),
-		float => AsNumber<float, int>(Field, Convert.ToInt32, int.TryParse),
-		decimal => AsNumber<decimal, int>(Field, Convert.ToInt32, int.TryParse),
-		bool field => ExpressionUtilities.CreateConstant(field ? 1 : 0, false, options),
-		JsonArray field => AsArray(field, Convert.ToInt32, int.TryParse),
+		string => AsNumber<string, int>(Field, Convert.ToInt32, int.TryParse, nullable),
+		int => AsNumber<int, int>(Field, Convert.ToInt32, int.TryParse, nullable),
+		long => AsNumber<long, int>(Field, Convert.ToInt32, int.TryParse, nullable),
+		short => AsNumber<short, int>(Field, Convert.ToInt32, int.TryParse, nullable),
+		byte => AsNumber<byte, int>(Field, Convert.ToInt32, int.TryParse, nullable),
+		double => AsNumber<double, int>(Field, Convert.ToInt32, int.TryParse, nullable),
+		float => AsNumber<float, int>(Field, Convert.ToInt32, int.TryParse, nullable),
+		decimal => AsNumber<decimal, int>(Field, Convert.ToInt32, int.TryParse, nullable),
+		bool field => CreateValueConstant(field ? 1 : 0, false),
+		JsonArray field => AsNumberArray(field, Convert.ToInt32, int.TryParse, nullable),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(int).FullName}")
 	};
 
-	public Expression? AsLong() => Field switch
+	public Expression? AsLong(bool nullable) => Field switch
 	{
-		string => AsNumber<string, long>(Field, Convert.ToInt64, long.TryParse),
-		int => AsNumber<int, long>(Field, Convert.ToInt64, long.TryParse),
-		long => AsNumber<long, long>(Field, Convert.ToInt64, long.TryParse),
-		short => AsNumber<short, long>(Field, Convert.ToInt64, long.TryParse),
-		byte => AsNumber<byte, long>(Field, Convert.ToInt64, long.TryParse),
-		double => AsNumber<double, long>(Field, Convert.ToInt64, long.TryParse),
-		float => AsNumber<float, long>(Field, Convert.ToInt64, long.TryParse),
-		decimal => AsNumber<decimal, long>(Field, Convert.ToInt64, long.TryParse),
-		bool field => ExpressionUtilities.CreateConstant(field ? 1L : 0L, false, options),
-		JsonArray field => AsArray(field, Convert.ToInt64, long.TryParse),
+		string => AsNumber<string, long>(Field, Convert.ToInt64, long.TryParse, nullable),
+		int => AsNumber<int, long>(Field, Convert.ToInt64, long.TryParse, nullable),
+		long => AsNumber<long, long>(Field, Convert.ToInt64, long.TryParse, nullable),
+		short => AsNumber<short, long>(Field, Convert.ToInt64, long.TryParse, nullable),
+		byte => AsNumber<byte, long>(Field, Convert.ToInt64, long.TryParse, nullable),
+		double => AsNumber<double, long>(Field, Convert.ToInt64, long.TryParse, nullable),
+		float => AsNumber<float, long>(Field, Convert.ToInt64, long.TryParse, nullable),
+		decimal => AsNumber<decimal, long>(Field, Convert.ToInt64, long.TryParse, nullable),
+		bool field => CreateValueConstant(field ? 1L : 0L, false),
+		JsonArray field => AsNumberArray(field, Convert.ToInt64, long.TryParse, nullable),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(long).FullName}")
 	};
 
-	public Expression? AsShort() =>  Field switch
+	public Expression? AsShort(bool nullable) => Field switch
 	{
-		string => AsNumber<string, short>(Field, Convert.ToInt16, short.TryParse),
-		int => AsNumber<int, short>(Field, Convert.ToInt16, short.TryParse),
-		long => AsNumber<long, short>(Field, Convert.ToInt16, short.TryParse),
-		short => AsNumber<short, short>(Field, Convert.ToInt16, short.TryParse),
-		byte => AsNumber<byte, short>(Field, Convert.ToInt16, short.TryParse),
-		double => AsNumber<double, short>(Field, Convert.ToInt16, short.TryParse),
-		float => AsNumber<float, short>(Field, Convert.ToInt16, short.TryParse),
-		decimal => AsNumber<decimal, short>(Field, Convert.ToInt16, short.TryParse),
-		bool field => ExpressionUtilities.CreateConstant(field ? (short)1 : (short)0, false, options),
-		JsonArray field => AsArray(field, Convert.ToInt16, short.TryParse),
+		string => AsNumber<string, short>(Field, Convert.ToInt16, short.TryParse, nullable),
+		int => AsNumber<int, short>(Field, Convert.ToInt16, short.TryParse, nullable),
+		long => AsNumber<long, short>(Field, Convert.ToInt16, short.TryParse, nullable),
+		short => AsNumber<short, short>(Field, Convert.ToInt16, short.TryParse, nullable),
+		byte => AsNumber<byte, short>(Field, Convert.ToInt16, short.TryParse, nullable),
+		double => AsNumber<double, short>(Field, Convert.ToInt16, short.TryParse, nullable),
+		float => AsNumber<float, short>(Field, Convert.ToInt16, short.TryParse, nullable),
+		decimal => AsNumber<decimal, short>(Field, Convert.ToInt16, short.TryParse, nullable),
+		bool field => CreateValueConstant(field ? (short)1 : (short)0, false),
+		JsonArray field => AsNumberArray(field, Convert.ToInt16, short.TryParse, nullable),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(short).FullName}")
 	};
 
-	public Expression? AsByte() =>  Field switch
+	public Expression? AsByte(bool nullable) => Field switch
 	{
-		string => AsNumber<string, byte>(Field, Convert.ToByte, byte.TryParse),
-		int => AsNumber<int, byte>(Field, Convert.ToByte, byte.TryParse),
-		long => AsNumber<long, byte>(Field, Convert.ToByte, byte.TryParse),
-		short => AsNumber<short, byte>(Field, Convert.ToByte, byte.TryParse),
-		byte => AsNumber<byte, byte>(Field, Convert.ToByte, byte.TryParse),
-		double => AsNumber<double, byte>(Field, Convert.ToByte, byte.TryParse),
-		float => AsNumber<float, byte>(Field, Convert.ToByte, byte.TryParse),
-		decimal => AsNumber<decimal, byte>(Field, Convert.ToByte, byte.TryParse),
-		bool field => ExpressionUtilities.CreateConstant(field ? (byte)1 : (byte)0, false, options),
-		JsonArray field => AsArray(field, Convert.ToByte, byte.TryParse),
+		string => AsNumber<string, byte>(Field, Convert.ToByte, byte.TryParse, nullable),
+		int => AsNumber<int, byte>(Field, Convert.ToByte, byte.TryParse, nullable),
+		long => AsNumber<long, byte>(Field, Convert.ToByte, byte.TryParse, nullable),
+		short => AsNumber<short, byte>(Field, Convert.ToByte, byte.TryParse, nullable),
+		byte => AsNumber<byte, byte>(Field, Convert.ToByte, byte.TryParse, nullable),
+		double => AsNumber<double, byte>(Field, Convert.ToByte, byte.TryParse, nullable),
+		float => AsNumber<float, byte>(Field, Convert.ToByte, byte.TryParse, nullable),
+		decimal => AsNumber<decimal, byte>(Field, Convert.ToByte, byte.TryParse, nullable),
+		bool field => CreateValueConstant(field ? (byte)1 : (byte)0, false),
+		JsonArray field => AsNumberArray(field, Convert.ToByte, byte.TryParse, nullable),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(byte).FullName}")
 	};
-	public Expression? AsDouble() =>  Field switch
+	public Expression? AsDouble(bool nullable) => Field switch
 	{
-		string => AsNumber<string, double>(Field, Convert.ToDouble, double.TryParse),
-		int => AsNumber<int, double>(Field, Convert.ToDouble, double.TryParse),
-		long => AsNumber<long, double>(Field, Convert.ToDouble, double.TryParse),
-		short => AsNumber<short, double>(Field, Convert.ToDouble, double.TryParse),
-		byte => AsNumber<byte, double>(Field, Convert.ToDouble, double.TryParse),
-		double => AsNumber<double, double>(Field, Convert.ToDouble, double.TryParse),
-		float => AsNumber<float, double>(Field, Convert.ToDouble, double.TryParse),
-		decimal => AsNumber<decimal, double>(Field, Convert.ToDouble, double.TryParse),
-		bool field => ExpressionUtilities.CreateConstant(field ? 1d : 0d, false, options),
-		JsonArray field => AsArray(field, Convert.ToDouble, double.TryParse),
+		string => AsNumber<string, double>(Field, Convert.ToDouble, double.TryParse, nullable),
+		int => AsNumber<int, double>(Field, Convert.ToDouble, double.TryParse, nullable),
+		long => AsNumber<long, double>(Field, Convert.ToDouble, double.TryParse, nullable),
+		short => AsNumber<short, double>(Field, Convert.ToDouble, double.TryParse, nullable),
+		byte => AsNumber<byte, double>(Field, Convert.ToDouble, double.TryParse, nullable),
+		double => AsNumber<double, double>(Field, Convert.ToDouble, double.TryParse, nullable),
+		float => AsNumber<float, double>(Field, Convert.ToDouble, double.TryParse, nullable),
+		decimal => AsNumber<decimal, double>(Field, Convert.ToDouble, double.TryParse, nullable),
+		bool field => CreateValueConstant(field ? 1d : 0d, false),
+		JsonArray field => AsNumberArray(field, Convert.ToDouble, double.TryParse, nullable),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(double).FullName}")
 	};
-	public Expression? AsFloat() =>  Field switch
+	public Expression? AsFloat(bool nullable) => Field switch
 	{
-		string => AsNumber<string, float>(Field, Convert.ToSingle, float.TryParse),
-		int => AsNumber<int, float>(Field, Convert.ToSingle, float.TryParse),
-		long => AsNumber<long, float>(Field, Convert.ToSingle, float.TryParse),
-		short => AsNumber<short, float>(Field, Convert.ToSingle, float.TryParse),
-		byte => AsNumber<byte, float>(Field, Convert.ToSingle, float.TryParse),
-		double => AsNumber<double, float>(Field, Convert.ToSingle, float.TryParse),
-		float => AsNumber<float, float>(Field, Convert.ToSingle, float.TryParse),
-		decimal => AsNumber<decimal, float>(Field, Convert.ToSingle, float.TryParse),
-		bool field => ExpressionUtilities.CreateConstant(field ? 1f : 0f, false, options),
-		JsonArray field => AsArray(field, Convert.ToSingle, float.TryParse),
+		string => AsNumber<string, float>(Field, Convert.ToSingle, float.TryParse, nullable),
+		int => AsNumber<int, float>(Field, Convert.ToSingle, float.TryParse, nullable),
+		long => AsNumber<long, float>(Field, Convert.ToSingle, float.TryParse, nullable),
+		short => AsNumber<short, float>(Field, Convert.ToSingle, float.TryParse, nullable),
+		byte => AsNumber<byte, float>(Field, Convert.ToSingle, float.TryParse, nullable),
+		double => AsNumber<double, float>(Field, Convert.ToSingle, float.TryParse, nullable),
+		float => AsNumber<float, float>(Field, Convert.ToSingle, float.TryParse, nullable),
+		decimal => AsNumber<decimal, float>(Field, Convert.ToSingle, float.TryParse, nullable),
+		bool field => CreateValueConstant(field ? 1f : 0f, false),
+		JsonArray field => AsNumberArray(field, Convert.ToSingle, float.TryParse, nullable),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(float).FullName}")
 	};
-	public Expression? AsDecimal() =>  Field switch
+	public Expression? AsDecimal(bool nullable) => Field switch
 	{
-		string => AsNumber<string, decimal>(Field, Convert.ToDecimal, decimal.TryParse),
-		int => AsNumber<int, decimal>(Field, Convert.ToDecimal, decimal.TryParse),
-		long => AsNumber<long, decimal>(Field, Convert.ToDecimal, decimal.TryParse),
-		short => AsNumber<short, decimal>(Field, Convert.ToDecimal, decimal.TryParse),
-		byte => AsNumber<byte, decimal>(Field, Convert.ToDecimal, decimal.TryParse),
-		double => AsNumber<double, decimal>(Field, Convert.ToDecimal, decimal.TryParse),
-		float => AsNumber<float, decimal>(Field, Convert.ToDecimal, decimal.TryParse),
-		decimal => AsNumber<decimal, decimal>(Field, Convert.ToDecimal, decimal.TryParse),
-		bool field => ExpressionUtilities.CreateConstant(field ? 1m : 0m, false, options),
-		JsonArray field => AsArray(field, Convert.ToDecimal, decimal.TryParse),
+		string => AsNumber<string, decimal>(Field, Convert.ToDecimal, decimal.TryParse, nullable),
+		int => AsNumber<int, decimal>(Field, Convert.ToDecimal, decimal.TryParse, nullable),
+		long => AsNumber<long, decimal>(Field, Convert.ToDecimal, decimal.TryParse, nullable),
+		short => AsNumber<short, decimal>(Field, Convert.ToDecimal, decimal.TryParse, nullable),
+		byte => AsNumber<byte, decimal>(Field, Convert.ToDecimal, decimal.TryParse, nullable),
+		double => AsNumber<double, decimal>(Field, Convert.ToDecimal, decimal.TryParse, nullable),
+		float => AsNumber<float, decimal>(Field, Convert.ToDecimal, decimal.TryParse, nullable),
+		decimal => AsNumber<decimal, decimal>(Field, Convert.ToDecimal, decimal.TryParse, nullable),
+		bool field => CreateValueConstant(field ? 1m : 0m, false),
+		JsonArray field => AsNumberArray(field, Convert.ToDecimal, decimal.TryParse, nullable),
 		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(decimal).FullName}")
 	};
 
 	private delegate bool NumberParser<T>(string str, NumberStyles numberStyles, IFormatProvider formatProvider, out T result);
 
-	private NewArrayExpression AsArray<TTo>(JsonArray field, Func<decimal, TTo> converter, NumberParser<TTo> parser)
+	private NewArrayExpression AsNumberArray<TTo>(JsonArray field, Func<decimal, TTo> converter, NumberParser<TTo> parser, bool nullable)
+		where TTo : struct
 	{
 		var defaultValue = typeof(TTo).IsValueType
 			? Expression.Constant(Activator.CreateInstance(typeof(TTo)))
 			: Expression.Constant(null);
 		return Expression.NewArrayInit(
-			typeof(TTo),
-			field.Select(x => AsNumber(x.Numberify(), converter, parser) ?? defaultValue));
+			nullable ? typeof(TTo?) : typeof(TTo),
+			field.Select(x =>
+			{
+				var value = x.Numberify();
+				return AsNumber(value, converter, parser, nullable) ?? defaultValue;
+			}));
 	}
 
-	private Expression? AsNumber<TFrom, TTo>(object? field, Func<TFrom, TTo> converter, NumberParser<TTo> parser)
+	private Expression? AsNumber<TFrom, TTo>(object? field, Func<TFrom, TTo> converter, NumberParser<TTo> parser, bool nullable)
+		where TTo : struct
 	{
 		if (field is string stringField && parser(stringField, NumberStyles.Any, options.CultureInfo, out var value))
 		{
-			return ExpressionUtilities.CreateConstant(value, false, options);
+			return CreateValueConstant(value, nullable);
 		}
 
 		if (field is TFrom numberField)
 		{
-			return ExpressionUtilities.CreateConstant(converter(numberField), false, options);
+			return CreateValueConstant(converter(numberField), nullable);
 		}
 
 		return null;
@@ -188,16 +234,60 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 
 	private delegate bool DateParser<T>(string str, IFormatProvider formatProvider, DateTimeStyles styles, out T result);
 
-	private Expression? AsDateLike<T>(DateParser<T> parser, DateTimeStyles style)
+	private Expression? AsDateLike<T>(DateParser<T> parser, DateTimeStyles style, bool nullable)
+		where T : struct
 	{
-		if (Field is not string stringField)
+		if (Field is string stringField)
 		{
-			return null;
+			return parser(stringField, options.CultureInfo, style, out var dateLike)
+				? CreateValueConstant(dateLike, nullable)
+				: null;
 		}
 
-		return parser(stringField, options.CultureInfo, style, out var dateLike)
-			? ExpressionUtilities.CreateConstant(dateLike, false, options)
-			: null;
+		if (Field is JsonArray arrayField)
+		{
+			if (nullable)
+			{
+				return Expression.NewArrayInit(typeof(T?), arrayField
+					.Select(x => x.Stringify())
+					.Select(x =>
+					{
+						if (string.IsNullOrWhiteSpace(x))
+						{
+							return null;
+						}
+
+						if (parser(x, options.CultureInfo, style, out var dateLike))
+						{
+							return dateLike as T?;
+						}
+
+						return null;
+					})
+					.Select(x => Expression.Constant(x, typeof(T?))));
+			}
+
+			return Expression.NewArrayInit(typeof(T), arrayField
+				.Select(x => x.Stringify())
+				.Select(x =>
+				{
+					if (!parser(x!, options.CultureInfo, style, out var dateLike))
+					{
+						throw new JsonLogicException($"Invalid date time '{x}' when parsing literal");
+					}
+
+					return dateLike;
+				})
+				.Select(x => Expression.Constant(x)));
+		}
+
+		return null;
+
+	}
+
+	private static Expression CreateValueConstant<T>(T value, bool nullable) where T : struct
+	{
+		return Expression.Constant(value, nullable ? typeof(T?) : typeof(T));
 	}
 }
 

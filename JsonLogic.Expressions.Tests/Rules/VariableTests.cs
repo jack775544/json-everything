@@ -45,7 +45,7 @@ public class VariableTests
 	{
 		var rule = new VariableRule("nullable", 11);
 		var data = new VariableTestData(5, 10);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<VariableTestData, int>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<VariableTestData, int?>(rule);
 
 		Assert.AreEqual(11, expression.Compile()(data));
 	}
@@ -97,7 +97,7 @@ public class VariableTests
 	{
 		var rule = new VariableRule("inner.Nullable", 11);
 		var data = new NestedTestData("hello world", new VariableTestData(5, 10));
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<NestedTestData, int>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<NestedTestData, int?>(rule);
 
 		Assert.AreEqual(11M, expression.Compile()(data));
 	}

@@ -12,6 +12,9 @@ public class RuleCollectionExpression : RuleExpression<RuleCollection>
 	/// <inheritdoc />
 	public override Expression CreateExpression(RuleCollection rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.NewArrayInit(typeof(object), ExpressionUtilities.EvaluateItems(rule.Rules, registry, parameter, options));
+		return registry.CreateExpressionInternal(
+			new LiteralRule(rule.Source),
+			parameter,
+			options);
 	}
 }
