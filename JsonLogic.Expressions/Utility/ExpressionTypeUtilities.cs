@@ -6,7 +6,10 @@ using System.Linq.Expressions;
 
 namespace Json.Logic.Expressions.Utility;
 
-internal static class ExpressionTypeUtilities
+/// <summary>
+/// Helper methods for working with expressions.
+/// </summary>
+public static class ExpressionTypeUtilities
 {
 	private static readonly List<Type> _numberTypeHierarchy =
 	[
@@ -38,7 +41,7 @@ internal static class ExpressionTypeUtilities
 		typeof(string),
 	];
 
-	public static readonly Dictionary<Type, Func<DataObject, bool, Expression?>> DataObjectConverters = new()
+	private static readonly Dictionary<Type, Func<DataObject, bool, Expression?>> _dataObjectConverters = new()
 	{
 		{ typeof(string), static (data, _) => data.AsString() },
 		{ typeof(Guid), static (data, nullable) => data.AsGuid(nullable) },
@@ -58,7 +61,13 @@ internal static class ExpressionTypeUtilities
 		{ typeof(object), static (data, _) => Expression.Constant(data.Field) }
 	};
 
-	public static List<Expression> Downcast(this IEnumerable<Expression> expressions, Type? desiredType = null)
+	/// <summary>
+	/// Casts the provided collection of expressions to a common type. Any literals that are passed in will attempt to be parsed as the type of any non literal values.
+	/// </summary>
+	/// <param name="expressions">The list of expressions to cast.</param>
+	/// <param name="desiredType">The desired type to cast things to. Note this is not a guarantee that the cast will succeed.</param>
+	/// <returns>A list of expressions in the same order as the input, all converted to the same type.</returns>
+	public static List<Expression> Downcast(IEnumerable<Expression> expressions, Type? desiredType = null)
 	{
 		var expressionList = expressions.ToList();
 		desiredType ??= GetDesiredType(expressionList, _typeHierarchy);
@@ -66,18 +75,34 @@ internal static class ExpressionTypeUtilities
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 
-	public static List<Expression> DowncastNumber(this IEnumerable<Expression> expressions)
+	/// <summary>
+	/// Casts the provided collection of expressions to a common comparable type. Any literals that are passed in will attempt to be parsed as the type of any non literal values.
+	/// </summary>
+	/// <param name="expressions">The list of expressions to cast.</param>
+	/// <param name="desiredType">The desired numerical type.</param>
+	/// <returns>A list of expressions in the same order as the input, all converted to the same type.</returns>
+	public static List<Expression> DowncastNumber(IEnumerable<Expression> expressions, Type? desiredType = null)
 	{
 		var expressionList = expressions.ToList();
-		var types = GetDataObjectTypes(expressionList);
-		var mostCommonType = types.Any(x => _numberTypeHierarchy.Contains(x))
-			? types.MaxBy(x => _numberTypeHierarchy.IndexOf(x)) ?? _numberTypeHierarchy.Last()
-			: _numberTypeHierarchy.Last();
-		var visitor = new DataObjectReplacer(mostCommonType, new DataObject(0, new CreateExpressionOptions()));
+
+		if (desiredType == null)
+		{
+			var types = GetDataObjectTypes(expressionList);
+			desiredType = types.Any(x => _numberTypeHierarchy.Contains(x))
+				? types.MaxBy(x => _numberTypeHierarchy.IndexOf(x)) ?? _numberTypeHierarchy.Last()
+				: _numberTypeHierarchy.Last();
+		}
+
+		var visitor = new DataObjectReplacer(desiredType, new DataObject(0, new CreateExpressionOptions()));
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 
-	public static List<Expression> DowncastComparable(this IEnumerable<Expression> expressions)
+	/// <summary>
+	/// Casts the provided collection of expressions to a common numerical type. Any literals that are passed in will attempt to be parsed as the type of any non literal values.
+	/// </summary>
+	/// <param name="expressions">The list of expressions to cast.</param>
+	/// <returns>A list of expressions in the same order as the input, all converted to the same type.</returns>
+	public static List<Expression> DowncastComparable(IEnumerable<Expression> expressions)
 	{
 		var expressionList = expressions.ToList();
 		var mostCommonType = _comparableTypeHierarchy.Last();
@@ -117,7 +142,7 @@ internal static class ExpressionTypeUtilities
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 
-	public static List<Type> GetDataObjectTypes(IEnumerable<Expression> expressions)
+	private static List<Type> GetDataObjectTypes(IEnumerable<Expression> expressions)
 	{
 		var inspector = new DataObjectTypeInspector();
 
@@ -129,7 +154,7 @@ internal static class ExpressionTypeUtilities
 		return inspector.DiscoveredTypes.ToList();
 	}
 
-	public static List<DataObject> GetDataObjects(IEnumerable<Expression> expressions)
+	private static List<DataObject> GetDataObjects(IEnumerable<Expression> expressions)
 	{
 		var inspector = new DataObjectTypeInspector();
 
@@ -163,10 +188,10 @@ internal static class ExpressionTypeUtilities
 		public T? Field { get; set; } = field;
 	}
 
-	public static Expression DataObjectToExpression(DataObject dataObject, Type convertTo)
+	internal static Expression DataObjectToExpression(DataObject dataObject, Type convertTo)
 	{
 		var isArray = false;
-		if (convertTo != typeof(string) && convertTo.TryGetGenericCollectionType(out var collectionType))
+		if (convertTo != typeof(string) && LogicTypeExtensions.TryGetGenericCollectionType(convertTo, out var collectionType))
 		{
 			isArray = true;
 			convertTo = collectionType;
@@ -202,12 +227,12 @@ internal static class ExpressionTypeUtilities
 					.Invoke([Enum.Parse(convertTo, enumValue)])), nameof(NullableBox<int>.Field));
 		}
 
-		if (convertTo != typeof(string) && typeof(IEnumerable).IsAssignableFrom(convertTo) && convertTo.TryGetGenericCollectionType(out var tempConvertTo))
+		if (convertTo != typeof(string) && typeof(IEnumerable).IsAssignableFrom(convertTo) && LogicTypeExtensions.TryGetGenericCollectionType(convertTo, out var tempConvertTo))
 		{
 			convertTo = tempConvertTo;
 		}
 
-		var result = DataObjectConverters.TryGetValue(convertTo, out var converter)
+		var result = _dataObjectConverters.TryGetValue(convertTo, out var converter)
 			? converter(dataObject, isNullable)
 			: throw new InvalidOperationException($"Could not find converter to convert {dataObject.Field} to {convertTo.FullName}");
 

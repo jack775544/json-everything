@@ -12,11 +12,11 @@ public class LooseNotEqualsRuleExpression : RuleExpression<LooseNotEqualsRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(LooseNotEqualsRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var args = new[]
+		var args = ExpressionTypeUtilities.Downcast(new[]
 		{
 			registry.CreateExpressionInternal(rule.A, parameter, options),
 			registry.CreateExpressionInternal(rule.B, parameter, options)
-		}.Downcast();
+		});
 
 		try
 		{

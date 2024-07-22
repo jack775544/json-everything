@@ -12,11 +12,11 @@ public class DivideRuleExpression : RuleExpression<DivideRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(DivideRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var args = new[]
+		var args = ExpressionTypeUtilities.Downcast(new[]
 		{
 			registry.CreateExpressionInternal(rule.A, parameter, options),
 			registry.CreateExpressionInternal(rule.B, parameter, options),
-		}.Downcast();
+		});
 		return Expression.Divide(args[0], args[1]);
 	}
 }

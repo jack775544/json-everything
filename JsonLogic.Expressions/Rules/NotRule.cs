@@ -13,6 +13,6 @@ public class NotRuleExpression : RuleExpression<NotRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(NotRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return Expression.Not(new [] { registry.CreateExpressionInternal(rule.Value, parameter, options) }.Downcast().First().IsTruthy());
+		return Expression.Not(ExpressionTypeUtilities.Downcast(new [] { registry.CreateExpressionInternal(rule.Value, parameter, options) }).First().IsTruthy());
 	}
 }

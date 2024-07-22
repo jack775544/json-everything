@@ -14,7 +14,7 @@ public class MoreThanEqualRuleExpression : RuleExpression<MoreThanEqualRule>
 	{
 		var a = registry.CreateExpressionInternal(rule.A, parameter, options);
 		var b = registry.CreateExpressionInternal(rule.B, parameter, options);
-		var args = new[] { a, b }.DowncastComparable();
+		var args = ExpressionTypeUtilities.DowncastComparable(new[] { a, b });
 		return Expression.GreaterThanOrEqual(args[0], args[1]);
 	}
 }

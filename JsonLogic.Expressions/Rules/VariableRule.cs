@@ -42,11 +42,11 @@ public class VariableRuleExpression : RuleExpression<VariableRule>
 				|| !property.Type.IsValueType)
 			{
 				var defaultValue = registry.CreateExpressionInternal(rule.DefaultValue, parameter, options);
-				var args = new[]
+				var args = ExpressionTypeUtilities.Downcast(new[]
 				{
 					property,
 					defaultValue
-				}.Downcast();
+				});
 
 				return Expression.Coalesce(args[0], args[1]);
 			}

@@ -21,13 +21,13 @@ public class MergeRuleExpression : RuleExpression<MergeRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(MergeRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options).Downcast().ToList();
+		var items = ExpressionTypeUtilities.Downcast(ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)).ToList();
 
 		var arrayItems = new List<Expression>(items.Count);
 		Type? genericType = null;
 		foreach (var item in items)
 		{
-			if (item.Type.TryGetGenericCollectionType(out var type))
+			if (LogicTypeExtensions.TryGetGenericCollectionType(item.Type, out var type))
 			{
 				genericType ??= type;
 

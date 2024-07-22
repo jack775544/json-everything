@@ -32,7 +32,7 @@ public class InRuleExpression : RuleExpression<InRule>
 	public override Expression CreateExpression(InRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
 		// Check if the value is a string
-		var valueString = new [] { registry.CreateExpressionInternal(rule.Value, parameter, options) }.Downcast(typeof(string)).First();
+		var valueString = ExpressionTypeUtilities.Downcast(new [] { registry.CreateExpressionInternal(rule.Value, parameter, options) }, typeof(string)).First();
 
 		// If passed a string then use the "".Contains method
 		if (valueString.Type == typeof(string))
@@ -40,7 +40,7 @@ public class InRuleExpression : RuleExpression<InRule>
 			return Expression.Call(
 				valueString,
 				_stringContainsMethod,
-				new [] { registry.CreateExpressionInternal(rule.Test, parameter, options) }.Downcast(typeof(string)).First().Stringify());
+				ExpressionTypeUtilities.Downcast(new [] { registry.CreateExpressionInternal(rule.Test, parameter, options) }, typeof(string)).First().Stringify());
 		}
 
 		var value = registry.CreateExpressionInternal(rule.Value, parameter, options);
@@ -51,7 +51,7 @@ public class InRuleExpression : RuleExpression<InRule>
 			return Expression.Constant(false);
 		}
 
-		if (!value.Type.TryGetGenericCollectionType(out var collectionType))
+		if (!LogicTypeExtensions.TryGetGenericCollectionType(value.Type, out var collectionType))
 		{
 			throw new JsonLogicException($"Value parameter for In rule must be enumerable, found type {value.Type.FullName} instead");
 		}
@@ -74,9 +74,9 @@ public class InRuleExpression : RuleExpression<InRule>
 		}
 
 		// Otherwise the value should be an array instead
-		var args = new[] { value, test }.Downcast(desiredType);
+		var args = ExpressionTypeUtilities.Downcast(new[] { value, test }, desiredType);
 
-		if (!args[0].Type.TryGetGenericCollectionType(out var convertedCollectionType))
+		if (!LogicTypeExtensions.TryGetGenericCollectionType(args[0].Type, out var convertedCollectionType))
 		{
 			// This should not really be possible, but check just in case.
 			throw new JsonLogicException($"Converted value parameter for In rule must be enumerable, found type {args[0].Type.FullName} instead");

@@ -13,8 +13,7 @@ public class SubtractRuleExpression : RuleExpression<SubtractRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(SubtractRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
-			.Downcast()
+		var items = ExpressionTypeUtilities.Downcast(ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options))
 			.Select(x => x.Numberify(0, options))
 			.ToList();
 

@@ -17,13 +17,13 @@ public class LessThanRuleExpression : RuleExpression<LessThanRule>
 
 		if (rule.C == null)
 		{
-			var args = new[] { a, b }.DowncastComparable();
+			var args = ExpressionTypeUtilities.DowncastComparable(new[] { a, b });
 			return Expression.LessThan(args[0], args[1]);
 		}
 
 		var c = registry.CreateExpressionInternal(rule.C, parameter, options);
 
-		var argsWithC = new[] { a, b, c }.DowncastComparable();
+		var argsWithC = ExpressionTypeUtilities.DowncastComparable(new[] { a, b, c });
 		return Expression.AndAlso(
 			Expression.LessThan(argsWithC[0], argsWithC[1]),
 			Expression.LessThan(argsWithC[1], argsWithC[2]));

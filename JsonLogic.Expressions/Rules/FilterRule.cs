@@ -21,14 +21,14 @@ public class FilterRuleExpression : RuleExpression<FilterRule>
 	{
 		var input = registry.CreateExpressionInternal(rule.Input, parameter, options);
 
-		if (!input.Type.TryGetGenericCollectionType(out var type))
+		if (!LogicTypeExtensions.TryGetGenericCollectionType(input.Type, out var type))
 		{
 			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
 		}
 
 		var param = Expression.Parameter(type, type.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
-		var args = new[] { input }.Downcast(type);
+		var args = ExpressionTypeUtilities.Downcast(new[] { input }, type);
 		return Expression.Call(
 			_whereMethod.MakeGenericMethod(type),
 			args[0],

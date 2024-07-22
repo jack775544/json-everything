@@ -17,8 +17,7 @@ public class MinRuleExpression : RuleExpression<MinRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(MinRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
-			.DowncastNumber()
+		return ExpressionTypeUtilities.DowncastNumber(ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options))
 			.Select(x => x.Numberify(options))
 			.Aggregate((a, c) => Expression.Call(_minMethod, a, c));
 	}

@@ -16,7 +16,7 @@ public class IfRuleExpression : RuleExpression<IfRule>
 	public override Expression CreateExpression(IfRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
 		var components = ExpressionUtilities.EvaluateItems(rule.Components, registry, parameter, options).ToList();
-		return new [] { CreateRuleRecursive(components) }.Downcast().First();
+		return ExpressionTypeUtilities.Downcast(new [] { CreateRuleRecursive(components) }).First();
 	}
 	
 	private static Expression CreateRuleRecursive(List<Expression> components)
@@ -27,7 +27,7 @@ public class IfRuleExpression : RuleExpression<IfRule>
 		}
 
 		return Expression.Condition(
-			new [] { components[0] }.Downcast(typeof(bool)).First(),
+			ExpressionTypeUtilities.Downcast(new [] { components[0] }, typeof(bool)).First(),
 			components[1],
 			CreateRuleRecursive(components.Skip(2).ToList()));
 	}
@@ -35,9 +35,9 @@ public class IfRuleExpression : RuleExpression<IfRule>
 	private static Expression CreateRuleExpression(List<Expression> components) => components.Count switch
 	{
 		0 => Expression.Constant(null),
-		1 => new [] { components[0] }.Downcast(typeof(bool)).First(),
-		2 => Expression.Condition(new [] { components[0] }.Downcast(typeof(bool)).First(), components[1], Expression.Constant(null)),
-		3 => Expression.Condition(new [] { components[0] }.Downcast(typeof(bool)).First(), components[1], components[2]),
+		1 => ExpressionTypeUtilities.Downcast(new [] { components[0] }, typeof(bool)).First(),
+		2 => Expression.Condition(ExpressionTypeUtilities.Downcast(new [] { components[0] }, typeof(bool)).First(), components[1], Expression.Constant(null)),
+		3 => Expression.Condition(ExpressionTypeUtilities.Downcast(new [] { components[0] }, typeof(bool)).First(), components[1], components[2]),
 		_ => throw new InvalidOperationException("Invalid number of arguments for if statement, expected 0, 1, 2 or 3 parameters")
 	};
 }

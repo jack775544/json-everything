@@ -5,7 +5,10 @@ using System.Linq;
 
 namespace Json.Logic.Expressions.Utility;
 
-internal static class TypeExtensions
+/// <summary>
+/// Extensions for <see cref="Type"/>.
+/// </summary>
+public static class LogicTypeExtensions
 {
 	/// <summary>
 	/// Gets the generic type from a list type.
@@ -13,7 +16,7 @@ internal static class TypeExtensions
 	/// <param name="type">The type to get the generic list type from.</param>
 	/// <param name="genericType">The retrieved generic type. Is null when return value is false.</param>
 	/// <returns>true if type param is a list, false otherwise.</returns>
-	public static bool TryGetGenericListType(this Type type, [NotNullWhen(true)]out Type? genericType)
+	internal static bool TryGetGenericListType(this Type type, [NotNullWhen(true)]out Type? genericType)
 	{
 		genericType = type
 			.GetInterfaces()
@@ -25,7 +28,13 @@ internal static class TypeExtensions
 		return genericType != null;
 	}
 	
-	public static bool TryGetGenericCollectionType(this Type type, [NotNullWhen(true)]out Type? genericType)
+	/// <summary>
+	/// Tries getting the generic type parameter for the type passed in if it is a collection.
+	/// </summary>
+	/// <param name="type">The collection type to ge the generic for.</param>
+	/// <param name="genericType">The output generic type.</param>
+	/// <returns>True if the input type is a collection and a generic could be retrieved, false otherwise.</returns>
+	public static bool TryGetGenericCollectionType(Type type, [NotNullWhen(true)]out Type? genericType)
 	{
 		if (type.IsArray)
 		{
@@ -58,7 +67,7 @@ internal static class TypeExtensions
 		return genericType != null;
 	}
 	
-	public static bool IsCollectionType(this Type type)
+	internal static bool IsCollectionType(this Type type)
 	{
 		return type.IsArray || TryGetGenericListType(type, out _);
 	}

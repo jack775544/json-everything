@@ -8,7 +8,7 @@ namespace Json.Logic.Expressions;
 /// <summary>
 /// Options for creating a <see cref="RuleExpressionRegistry"/>.
 /// </summary>
-public class CreateRegistryOptions : CreateExpressionOptions
+public record CreateRegistryOptions : CreateExpressionOptions
 {
 	internal Dictionary<Type, IRuleExpression> Registry { get; } = new();
 

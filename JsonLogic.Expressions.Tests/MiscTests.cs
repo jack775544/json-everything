@@ -195,19 +195,10 @@ public class MiscTests
 		{
 			WrapConstants = false,
 		});
-		// .ConfigureProperty<TestData, DateTime>(x => x.UtcDateField, x => x.ParseStyle(DateTimeStyles.AdjustToUniversal)));
 
 		// Yikes, don't really want to write a visitor just for this test though
 		var dateTime = (DateTime)((ConstantExpression)((BinaryExpression)expression.Body).Left).Value!;
 		Assert.AreEqual(kind, dateTime.Kind);
-
-		// var data = new TestData[]
-		// {
-		// 	new TestData(),
-		// };
-		//
-		// var results = data.Where(func).ToList();
-		// Assert.AreEqual(2, results.Count);
 	}
 
 	private record InIdTestData(Guid? Id);
@@ -245,5 +236,35 @@ public class MiscTests
 
 		Assert.IsTrue(func(new InIdTestData(Guid.Parse("000dc3ee-fa94-4b79-8d88-054262f71cf2"))));
 		Assert.IsFalse(func(new InIdTestData(Guid.Parse("000dc3ee-fa94-4b79-8d88-054262f71cf3"))));
+	}
+
+	private record SomeConstantTestData(Guid Id);
+
+	[Test]
+	public void SomeConstantArray()
+	{
+		// language=JSON
+		var logic = """
+			{
+				"in": [
+					{ "var": ["id"] },
+					[
+						"5ce6b074-f10f-475b-b908-2ce7dfddfea1",
+						"31b96e8a-4648-4200-8930-bb7ed1091f98",
+						"e84f49b6-0a6e-4239-aa7f-c77b58c31e74"
+					]
+				]
+			}
+			""";
+
+		var rule = JsonSerializer.Deserialize<Rule>(logic, TestDataSerializerContext.Default.Rule)!;
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<SomeConstantTestData, bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
+		Console.WriteLine(expression.ToString());
+		var func = expression.Compile();
+
+		Assert.IsTrue(func(new SomeConstantTestData(Guid.Parse("5ce6b074-f10f-475b-b908-2ce7dfddfea1"))));
 	}
 }

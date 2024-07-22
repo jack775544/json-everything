@@ -12,11 +12,11 @@ public class ModRuleExpression : RuleExpression<ModRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(ModRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var args = new[]
+		var args = ExpressionTypeUtilities.Downcast(new[]
 		{
 			registry.CreateExpressionInternal(rule.A, parameter, options),
 			registry.CreateExpressionInternal(rule.B, parameter, options)
-		}.Downcast();
+		});
 		return Expression.Modulo(args[0], args[1]);
 	}
 }

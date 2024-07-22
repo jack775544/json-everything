@@ -18,7 +18,7 @@ public class AllRuleExpression : RuleExpression<AllRule>
 	{
 		var input = registry.CreateExpressionInternal(rule.Input, parameter, options);
 
-		if (!input.Type.TryGetGenericCollectionType(out var paramType))
+		if (!LogicTypeExtensions.TryGetGenericCollectionType(input.Type, out var paramType))
 		{
 			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
 		}
@@ -26,7 +26,7 @@ public class AllRuleExpression : RuleExpression<AllRule>
 		var param = Expression.Parameter(paramType, paramType.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
 
-		var args = new[] { input }.Downcast(paramType);
+		var args = ExpressionTypeUtilities.Downcast(new[] { input }, paramType);
 		
 		return Expression.Call(
 			_allMethod.MakeGenericMethod(paramType),

@@ -13,7 +13,7 @@ public class AndRuleExpression : RuleExpression<AndRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(AndRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var expressions = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options).Downcast(typeof(bool));
+		var expressions = ExpressionTypeUtilities.Downcast(ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options), typeof(bool));
 		return expressions.Count switch
 		{
 			0 => ExpressionUtilities.CreateConstant(true, false, options),

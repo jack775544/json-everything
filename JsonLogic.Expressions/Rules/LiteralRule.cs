@@ -39,7 +39,7 @@ public class LiteralRuleExpression : RuleExpression<LiteralRule>
 
 				if (valueArray.Count == 0)
 				{
-					return Expression.NewArrayInit(typeof(object));
+					return Expression.Constant(new DataArray<object>(new JsonArray(), options));
 				}
 
 				var kind = LiteralType.Undefined;

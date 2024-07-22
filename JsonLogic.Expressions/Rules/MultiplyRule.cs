@@ -13,8 +13,7 @@ public class MultiplyRuleExpression : RuleExpression<MultiplyRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(MultiplyRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		var items = ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options)
-			.DowncastNumber()
+		var items = ExpressionTypeUtilities.DowncastNumber(ExpressionUtilities.EvaluateItems(rule.Items, registry, parameter, options))
 			.Select(x => x.Numberify(options))
 			.ToList();
 		return items.Count == 1 ? items[0] : items.Aggregate(Expression.MultiplyChecked);

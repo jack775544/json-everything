@@ -16,9 +16,9 @@ public class ReduceRuleExpression : RuleExpression<ReduceRule>
 	public override Expression CreateExpression(ReduceRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
 		var input = registry.CreateExpressionInternal(rule.Input, parameter, options);
-		var initial = new [] { registry.CreateExpressionInternal(rule.Initial, parameter, options) }.Downcast().First();
+		var initial = ExpressionTypeUtilities.Downcast(new [] { registry.CreateExpressionInternal(rule.Initial, parameter, options) }).First();
 
-		if (!input.Type.TryGetGenericCollectionType(out var collectionType))
+		if (!LogicTypeExtensions.TryGetGenericCollectionType(input.Type, out var collectionType))
 		{
 			throw new JsonLogicException("Non collection passed when the expecting collection in reduce rule");
 		}
@@ -40,7 +40,7 @@ public class ReduceRuleExpression : RuleExpression<ReduceRule>
 				new(stateType, stateType.GetMember(nameof(ReduceState<object, object>.Current)).First(), currentParam)
 			});
 
-		var args = new[] { input }.Downcast(collectionType);
+		var args = ExpressionTypeUtilities.Downcast(new[] { input }, collectionType);
 
 		return Expression.Call(
 			_aggregateMethod.MakeGenericMethod(collectionType, initial.Type),
