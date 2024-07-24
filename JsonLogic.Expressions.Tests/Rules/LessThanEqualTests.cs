@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Json.Logic.Rules;
 using NUnit.Framework;
 
@@ -29,12 +30,13 @@ public class LessThanEqualTests
 		Assert.IsFalse(expression.Compile()(null));
 	}
 
-	[Test]
-	public void LessThanEqualNullCastsNullToZero()
+	[TestCase("null", "2")]
+	[TestCase("2", "null")]
+	public void LessThanEqualNullCastsAlwaysFalse(string a, string b)
 	{
-		var rule = new LessThanEqualRule(LiteralRule.Null, 2);
+		var rule = new LessThanEqualRule(JsonNode.Parse(a), JsonNode.Parse(b));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()(null));
 	}
 	
 	[Test]

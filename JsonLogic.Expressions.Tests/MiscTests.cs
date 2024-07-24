@@ -267,4 +267,44 @@ public class MiscTests
 
 		Assert.IsTrue(func(new SomeConstantTestData(Guid.Parse("5ce6b074-f10f-475b-b908-2ce7dfddfea1"))));
 	}
+	
+	public enum DataType { A, B, C, D }
+
+	public record QueryEnumData(DataType Type);
+	
+	[Test]
+	public void CanQueryEnum()
+	{
+		// language=JSON
+		var logic = """
+			{"and":[{"in":[{"var":["type"]},["A"]]}]}
+			""";
+		
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule)!;
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<QueryEnumData, bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
+		
+		Console.WriteLine(expression.ToString());
+	}
+
+	public record AndEqualsTestData(Guid? Id);
+
+	[Test]
+	public void CanQueryAndEqualsNullableGuid()
+	{
+		// language=JSON
+		var logic = """
+			{"and":[{"==":[{"var":["id"]},null]}]}
+			""";
+
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule)!;
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<AndEqualsTestData, bool>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = false,
+		});
+
+		Console.WriteLine(expression.ToString());
+	}
 }

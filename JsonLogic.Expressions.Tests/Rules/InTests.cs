@@ -78,7 +78,7 @@ public class InTests
 		var rule = new InRule(1, LiteralRule.Null);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.Throws<NullReferenceException>(() => expression.Compile()(null));
 	}
 
 	[Test]

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.Json.Nodes;
 
 namespace Json.Logic.Expressions.Utility;
 
@@ -40,21 +39,21 @@ internal static class ExpressionExtensions
 		return expression.Numberify(Expression.Constant(new DataObject(null, options)), options);
 	}
 
-	public static Expression Numberify<T>(this Expression expression, T nullCast, CreateExpressionOptions options)
+	public static Expression Numberify(this Expression expression, object nullCast, CreateExpressionOptions options)
 	{
-		return expression.Numberify(ExpressionUtilities.CreateConstant(nullCast, true, options), options);
+		return expression.Numberify(Expression.Constant(new DataObject(JsonNode.Parse($"{nullCast}"), options)), options);
 	}
 
 	public static Expression Numberify(this Expression expression, Expression nullCast, CreateExpressionOptions options)
 	{
 		// This will be null
-		if (expression.Type == typeof(DataObject)) return expression;
+		if (expression.Type == typeof(DataObject)) return ExpressionTypeUtilities.Downcast(new [] { expression }, typeof(decimal)).First();
 		if (expression.Type == typeof(object)) return nullCast;
 		if (expression.Type == typeof(string)) return Expression.Call(_convertStringToDecimalMethod, expression);
 		if (expression.Type == typeof(bool)) return Expression.Condition(
 			expression,
-			Expression.Constant(new DataObject(1, options)),
-			Expression.Constant(new DataObject(0, options)));
+			Expression.Constant(new DataObject(JsonNode.Parse("1"), options)),
+			Expression.Constant(new DataObject(JsonNode.Parse("0"), options)));
 
 		return expression;
 	}
@@ -85,6 +84,12 @@ internal static class ExpressionExtensions
 		if (expression.Type == typeof(bool)) return expression;
 		if (expression.Type == typeof(string))
 			return Expression.Not(Expression.Call(_isNullOrEmptyMethod, expression));
+		if (expression.Type == typeof(int)) return Expression.NotEqual(expression, Expression.Constant(0));
+		if (expression.Type == typeof(long)) return Expression.NotEqual(expression, Expression.Constant(0L));
+		if (expression.Type == typeof(short)) return Expression.NotEqual(expression, Expression.Constant((short)0));
+		if (expression.Type == typeof(byte)) return Expression.NotEqual(expression, Expression.Constant((byte)0));
+		if (expression.Type == typeof(double)) return Expression.NotEqual(expression, Expression.Constant(0d));
+		if (expression.Type == typeof(float)) return Expression.NotEqual(expression, Expression.Constant(0f));
 		if (expression.Type == typeof(decimal)) return Expression.NotEqual(expression, Expression.Constant(0M));
 
 		return Expression.Constant(false);

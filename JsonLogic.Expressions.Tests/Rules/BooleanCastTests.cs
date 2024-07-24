@@ -86,4 +86,19 @@ public class BooleanCastTests
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		Assert.IsFalse(expression.Compile()(null));
 	}
+	
+	[TestCase("0", false)]
+	[TestCase("1", true)]
+	[TestCase("-1", true)]
+	[TestCase("[]", false)]
+	[TestCase("[1,2]", true)]
+	[TestCase("\"\"", false)]
+	[TestCase("\"anything\"", true)]
+	[TestCase("null", false)]
+	public void Truthiness(string text, bool expected)
+	{
+		var rule = new BooleanCastRule(JsonNode.Parse(text));
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
+		Assert.AreEqual(expected, expression.Compile()(null));
+	}
 }

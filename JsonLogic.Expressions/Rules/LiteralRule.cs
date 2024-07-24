@@ -16,31 +16,24 @@ public class LiteralRuleExpression : RuleExpression<LiteralRule>
 	/// <inheritdoc />
 	public override Expression CreateExpression(LiteralRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
 	{
-		return rule.Value == null
-			? Expression.Constant(null)
-			: JsonNodeToExpression(rule.Value, parameter, options, true);
+		return JsonNodeToExpression(rule.Value, parameter, options, true);
 	}
 
 	internal static Expression JsonNodeToExpression(JsonNode? node, Expression? parameter, CreateExpressionOptions options, bool createBox)
 	{
 		if (node == null)
 		{
-			return ExpressionUtilities.CreateConstant<object?>(null, createBox, options);
+			return Expression.Constant(new DataObject(JsonNode.Parse("null"), options));
 		}
 
 		switch (node.GetValueKind())
 		{
 			case JsonValueKind.Undefined:
-				return ExpressionUtilities.CreateConstant<object?>(null, createBox, options);
+				return Expression.Constant(new DataObject(node, options));
 			case JsonValueKind.Object:
 				throw new NotImplementedException("Object values not yet implemented");
 			case JsonValueKind.Array:
 				var valueArray = node.AsArray();
-
-				if (valueArray.Count == 0)
-				{
-					return Expression.Constant(new DataArray<object>(new JsonArray(), options));
-				}
 
 				var kind = LiteralType.Undefined;
 				foreach (var value in valueArray)
@@ -58,34 +51,27 @@ public class LiteralRuleExpression : RuleExpression<LiteralRule>
 					}
 				}
 
-				if (createBox)
-				{
-					return kind switch
+				return Expression.Constant(typeof(DataArray<>)
+					.MakeGenericType(kind switch
 					{
-						LiteralType.Undefined => Expression.Constant(new DataArray<object>(node.AsArray(), options)),
-						LiteralType.Object => throw new NotImplementedException("Object value literals not yet implemented"),
-						LiteralType.Array => throw new NotImplementedException("Nested array literals not yet implemented"),
-						LiteralType.String => Expression.Constant(new DataArray<string>(node.AsArray(), options)),
-						LiteralType.Number => Expression.Constant(new DataArray<decimal>(node.AsArray(), options)),
-						LiteralType.Boolean => Expression.Constant(new DataArray<bool>(node.AsArray(), options)),
+						LiteralType.Undefined => typeof(UndefinedLiteralType),
+						LiteralType.Object => typeof(ObjectLiteralType),
+						LiteralType.Array => typeof(ArrayLiteralType),
+						LiteralType.String => typeof(StringLiteralType),
+						LiteralType.Number => typeof(NumberLiteralType),
+						LiteralType.Boolean => typeof(BooleanLiteralType),
 						_ => throw new ArgumentOutOfRangeException()
-					};
-				}
+					})
+					.GetConstructors()
+					.Single()
+					.Invoke([valueArray, options]));
 
-				var values = valueArray
-					.Select(x => JsonNodeToExpression(x!, parameter, options, false))
-					.ToList();
-				return Expression.NewArrayInit(values[0].Type, values);
 			case JsonValueKind.String:
-				return ExpressionUtilities.CreateConstant(node.GetValue<string>(), createBox, options);
 			case JsonValueKind.Number:
-				return ExpressionUtilities.CreateConstant(node.Numberify(), createBox, options);
 			case JsonValueKind.True:
-				return ExpressionUtilities.CreateConstant(true, createBox, options);
 			case JsonValueKind.False:
-				return ExpressionUtilities.CreateConstant(false, createBox, options);
 			case JsonValueKind.Null:
-				return ExpressionUtilities.CreateConstant<object?>(null, createBox, options);
+				return Expression.Constant(new DataObject(node, options));
 			default:
 				throw new ArgumentOutOfRangeException();
 		}
@@ -100,6 +86,13 @@ public class LiteralRuleExpression : RuleExpression<LiteralRule>
 		Number,
 		Boolean,
 	}
+
+	internal class UndefinedLiteralType;
+	internal class ObjectLiteralType;
+	internal class ArrayLiteralType;
+	internal class StringLiteralType;
+	internal class NumberLiteralType;
+	internal class BooleanLiteralType;
 
 	private static LiteralType GetLiteralType(JsonNode? node)
 	{

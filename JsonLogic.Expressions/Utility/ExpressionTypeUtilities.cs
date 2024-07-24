@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json.Nodes;
 
 namespace Json.Logic.Expressions.Utility;
 
@@ -71,7 +72,7 @@ public static class ExpressionTypeUtilities
 	{
 		var expressionList = expressions.ToList();
 		desiredType ??= GetDesiredType(expressionList, _typeHierarchy);
-		var visitor = new DataObjectReplacer(desiredType);
+		var visitor = new DataObjectReplacer(desiredType, false);
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 
@@ -85,15 +86,9 @@ public static class ExpressionTypeUtilities
 	{
 		var expressionList = expressions.ToList();
 
-		if (desiredType == null)
-		{
-			var types = GetDataObjectTypes(expressionList);
-			desiredType = types.Any(x => _numberTypeHierarchy.Contains(x))
-				? types.MaxBy(x => _numberTypeHierarchy.IndexOf(x)) ?? _numberTypeHierarchy.Last()
-				: _numberTypeHierarchy.Last();
-		}
+		desiredType ??= GetDesiredType(expressionList, _numberTypeHierarchy);
 
-		var visitor = new DataObjectReplacer(desiredType, new DataObject(0, new CreateExpressionOptions()));
+		var visitor = new DataObjectReplacer(desiredType, false, new DataObject(JsonNode.Parse("0"), new CreateExpressionOptions()));
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 
@@ -108,13 +103,16 @@ public static class ExpressionTypeUtilities
 		var mostCommonType = _comparableTypeHierarchy.Last();
 
 		var desiredType = expressionList.Select(x => x.Type).FirstOrDefault(x => x != typeof(DataObject));
+		var nullable = false;
 		if (desiredType != null && desiredType != typeof(object))
 		{
 			mostCommonType = desiredType;
 		}
 		else
 		{
-			var objects = GetDataObjects(expressionList);
+			var results = GetDataObjects(expressionList);
+			var objects = results.DiscoveredObjects;
+			nullable = results.Nullable;
 			var done = false;
 			foreach (var comparableType in _comparableTypeHierarchy)
 			{
@@ -123,7 +121,7 @@ public static class ExpressionTypeUtilities
 					// TODO: Refactor this to not use exceptions for general flow control, Make TryConvert method instead.
 					try
 					{
-						DataObjectToExpression(dataObject, comparableType);
+						DataObjectToExpression(dataObject, nullable, comparableType);
 						mostCommonType = comparableType;
 						done = true;
 						break;
@@ -138,7 +136,7 @@ public static class ExpressionTypeUtilities
 			}
 		}
 
-		var visitor = new DataObjectReplacer(mostCommonType, new DataObject(0, new CreateExpressionOptions()));
+		var visitor = new DataObjectReplacer(mostCommonType, nullable, new DataObject(0, new CreateExpressionOptions()));
 		return expressionList.Select(x => visitor.Visit(x)).ToList();
 	}
 
@@ -154,7 +152,7 @@ public static class ExpressionTypeUtilities
 		return inspector.DiscoveredTypes.ToList();
 	}
 
-	private static List<DataObject> GetDataObjects(IEnumerable<Expression> expressions)
+	private static IDataObjectTypeInspectorResults GetDataObjects(IEnumerable<Expression> expressions)
 	{
 		var inspector = new DataObjectTypeInspector();
 
@@ -163,11 +161,19 @@ public static class ExpressionTypeUtilities
 			inspector.Visit(expression);
 		}
 
-		return inspector.DiscoveredObjects.ToList();
+		return inspector;
 	}
 
 	private static Type GetDesiredType(List<Expression> expressions, List<Type> typeHierarchy)
 	{
+		// Prefer parameter types
+		var parameter = expressions.FirstOrDefault(ParameterFinder.ContainsParameter);
+
+		if (parameter != null)
+		{
+			return parameter.Type;
+		}
+
 		// If something is explicitly declaring its type, then use it.
 		var desiredType = expressions.Select(x => x.Type).FirstOrDefault(x => !typeof(DataObject).IsAssignableFrom(x));
 		if (desiredType != null && desiredType != typeof(object))
@@ -179,7 +185,7 @@ public static class ExpressionTypeUtilities
 
 		// If the type needs to be inferred, then convert to the most common type
 		// The most common type will be the one that has the lowest value in the type hierarchy
-		var mostCommonType = discoveredTypes.MaxBy(x => _typeHierarchy.IndexOf(x)) ?? typeof(string);
+		var mostCommonType = discoveredTypes.MaxBy(typeHierarchy.IndexOf) ?? typeof(string);
 		return mostCommonType;
 	}
 
@@ -188,7 +194,7 @@ public static class ExpressionTypeUtilities
 		public T? Field { get; set; } = field;
 	}
 
-	internal static Expression DataObjectToExpression(DataObject dataObject, Type convertTo)
+	internal static Expression DataObjectToExpression(DataObject dataObject, bool nullable, Type convertTo)
 	{
 		var isArray = false;
 		if (convertTo != typeof(string) && LogicTypeExtensions.TryGetGenericCollectionType(convertTo, out var collectionType))
@@ -197,34 +203,42 @@ public static class ExpressionTypeUtilities
 			convertTo = collectionType;
 		}
 
-		var isNullable = false;
+		var isNullable = nullable;
 		if (convertTo.IsGenericType && convertTo.GetGenericTypeDefinition() == typeof(Nullable<>))
 		{
 			convertTo = convertTo.GetGenericArguments()[0];
 			isNullable = true;
 		}
 
-		if (convertTo.IsEnum && dataObject.Field != null)
+		if (convertTo.IsEnum)
 		{
 			string enumValue;
 
-			if (dataObject.Field is string stringField)
+			switch (dataObject.Field)
 			{
-				enumValue = stringField;
-			}
-			else
-			{
-				enumValue = dataObject.Field.ToString()!;
+				case null:
+					return CreateEnumExpression(true, convertTo, null);
+				case JsonArray array:
+				{
+					var enumInitializers = array.Select(node => node == null
+						? CreateEnumExpression(true, convertTo, null)
+						: CreateEnumExpression(isNullable, convertTo, node.ToString()));
+
+					var arrayType = isNullable
+						? typeof(Nullable<>).MakeGenericType(convertTo)
+						: convertTo;
+
+					return Expression.NewArrayInit(arrayType, enumInitializers);
+				}
+				case string stringField:
+					enumValue = stringField;
+					break;
+				default:
+					enumValue = dataObject.Field.ToString()!;
+					break;
 			}
 
-			return !isNullable
-				? Expression.Constant(Enum.Parse(convertTo, enumValue))
-				: Expression.PropertyOrField(Expression.Constant(typeof(NullableBox<>)
-					.MakeGenericType(convertTo)
-					.GetConstructors()
-					.Single()
-					// .Single(x => x.GetParameters().Length == 1 && x.GetParameters()[0].ParameterType == convertTo)
-					.Invoke([Enum.Parse(convertTo, enumValue)])), nameof(NullableBox<int>.Field));
+			return CreateEnumExpression(isNullable, convertTo, enumValue);
 		}
 
 		if (convertTo != typeof(string) && typeof(IEnumerable).IsAssignableFrom(convertTo) && LogicTypeExtensions.TryGetGenericCollectionType(convertTo, out var tempConvertTo))
@@ -247,4 +261,12 @@ public static class ExpressionTypeUtilities
 				: Expression.NewArrayInit(convertTo, result.Type.IsValueType ? Expression.Convert(result, typeof(object)) : result)
 			: result;
 	}
+
+	private static Expression CreateEnumExpression(bool isNullable, Type convertTo, string? enumValue) => !isNullable
+		? Expression.Constant(Enum.Parse(convertTo, enumValue!))
+		: Expression.PropertyOrField(Expression.Constant(typeof(NullableBox<>)
+			.MakeGenericType(convertTo)
+			.GetConstructors()
+			.Single()
+			.Invoke([enumValue == null ? null : Enum.Parse(convertTo, enumValue)])), nameof(NullableBox<int>.Field));
 }

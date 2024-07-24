@@ -392,4 +392,22 @@ public class EfCoreTests
 			.ToListAsync();
 		Assert.AreEqual(1, employees.Count);
 	}
+
+	[Test]
+	public async Task InEnumArray()
+	{
+		await using var database = new TestDatabase();
+		await database.InitialiseAsync();
+
+		var rule = new InRule(
+			new VariableRule("EmploymentType"),
+			new LiteralRule(JsonNode.Parse("""["FullTime", "PartTime"]""")));
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<Employee, bool>(rule, _options);
+
+		var employees = await database.DbContext
+			.Employees
+			.Where(expression)
+			.ToListAsync();
+		Assert.AreEqual(3, employees.Count);
+	}
 }

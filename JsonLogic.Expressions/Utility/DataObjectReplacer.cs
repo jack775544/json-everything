@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace Json.Logic.Expressions.Utility;
 
-internal class DataObjectReplacer(Type? desiredType, DataObject? nullCast = null) : ExpressionVisitor
+internal class DataObjectReplacer(Type? desiredType, bool nullable, DataObject? nullCast = null) : ExpressionVisitor
 {
 	protected override Expression VisitConstant(ConstantExpression node)
 	{
@@ -12,10 +12,6 @@ internal class DataObjectReplacer(Type? desiredType, DataObject? nullCast = null
 			if (node.Type == typeof(object) && desiredType != null && desiredType.IsGenericType && desiredType.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
 				node = Expression.Constant(nullCast, desiredType);
-			}
-			else
-			{
-				node = Expression.Constant(nullCast);
 			}
 		}
 
@@ -33,8 +29,8 @@ internal class DataObjectReplacer(Type? desiredType, DataObject? nullCast = null
 		var dataObject = (DataObject)node.Value;
 
 		return desiredType != null
-			? ExpressionTypeUtilities.DataObjectToExpression(dataObject, desiredType)
-			: ExpressionTypeUtilities.DataObjectToExpression(dataObject, dataObject.Field?.GetType() ?? typeof(object));
+			? ExpressionTypeUtilities.DataObjectToExpression(dataObject, nullable, desiredType)
+			: ExpressionTypeUtilities.DataObjectToExpression(dataObject, nullable, dataObject.Field?.GetType() ?? typeof(object));
 	}
 
 	protected override Expression VisitConditional(ConditionalExpression node)
@@ -44,6 +40,6 @@ internal class DataObjectReplacer(Type? desiredType, DataObject? nullCast = null
 		var ifFalse = Visit(node.IfFalse);
 
 		// Can suppress null warning since we know that our visitor will not give back nulls
-		return Expression.Condition(test!, ifTrue!, ifFalse!);
+		return Expression.Condition(test, ifTrue, ifFalse);
 	}
 }

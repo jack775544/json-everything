@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Json.Logic.Expressions.Rules;
 
 namespace Json.Logic.Expressions.Utility;
 
@@ -46,7 +47,37 @@ public static class LogicTypeExtensions
 		{
 			if (type.GetGenericTypeDefinition() == typeof(DataArray<>))
 			{
-				genericType = type.GenericTypeArguments[0];
+				var arrayGeneric = type.GenericTypeArguments[0];
+				if (arrayGeneric == typeof(LiteralRuleExpression.UndefinedLiteralType))
+				{
+					genericType = typeof(object);
+				}
+				else if (arrayGeneric == typeof(LiteralRuleExpression.ObjectLiteralType))
+				{
+					genericType = typeof(object);
+				}
+				else if (arrayGeneric == typeof(LiteralRuleExpression.ArrayLiteralType))
+				{
+					genericType = typeof(object);
+				}
+				else if (arrayGeneric == typeof(LiteralRuleExpression.StringLiteralType))
+				{
+					genericType = typeof(string);
+				}
+				else if (arrayGeneric == typeof(LiteralRuleExpression.NumberLiteralType))
+				{
+					genericType = typeof(decimal);
+				}
+				else if (arrayGeneric == typeof(LiteralRuleExpression.BooleanLiteralType))
+				{
+					genericType = typeof(bool);
+				}
+				else
+				{
+					genericType = null;
+					return false;
+				}
+
 				return true;
 			}
 

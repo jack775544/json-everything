@@ -47,7 +47,7 @@ public class AddTests
 	public void AddSingleTrueThrowsError()
 	{
 		var rule = new AddRule(true);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<object>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
 		Assert.AreEqual(1, expression.Compile()(null));
 	}
@@ -56,7 +56,7 @@ public class AddTests
 	public void AddSingleFalseThrowsError()
 	{
 		var rule = new AddRule(false);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<object>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
 		Assert.AreEqual(0, expression.Compile()(null));
 	}
@@ -65,7 +65,7 @@ public class AddTests
 	public void AddSingleNullReturns0()
 	{
 		var rule = new AddRule(LiteralRule.Null);
-		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<int>(rule);
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
 		Assert.AreEqual(0, expression.Compile()(null));
 	}

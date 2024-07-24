@@ -13,7 +13,7 @@ internal class ExpressionUtilities
 
 	public static Expression CreateConstant<T>(T constant, bool createBox, CreateExpressionOptions options)
 	{
-		if (createBox && constant is string or decimal or bool)
+		if (createBox)
 		{
 			return Expression.Constant(new DataObject(constant, options));
 		}
