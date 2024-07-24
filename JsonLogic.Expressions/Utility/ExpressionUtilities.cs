@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json.Nodes;
 
 namespace Json.Logic.Expressions.Utility;
 
@@ -11,7 +12,7 @@ internal class ExpressionUtilities
 		return items.Select(x => registry.CreateExpressionInternal(x, parameter, options));
 	}
 
-	public static Expression CreateConstant<T>(T constant, bool createBox, CreateExpressionOptions options)
+	public static Expression CreateConstant(JsonNode? constant, bool createBox, CreateExpressionOptions options)
 	{
 		if (createBox)
 		{

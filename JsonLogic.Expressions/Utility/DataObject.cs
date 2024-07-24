@@ -6,16 +6,15 @@ using System.Text.Json.Nodes;
 
 namespace Json.Logic.Expressions.Utility;
 
-internal class DataObject(object? constant, CreateExpressionOptions options)
+internal class DataObject(JsonNode? constant, CreateExpressionOptions options)
 {
-	public object? Field { get; init; } = constant;
+	public JsonNode? Field { get; init; } = constant;
 
 	public Expression AsString() => Field switch
 	{
 		null => Expression.Constant(null, typeof(string)),
 		JsonArray field => Expression.NewArrayInit(typeof(string), field.Select(x => new DataObject(x, options).AsString())),
-		JsonNode field => Expression.Constant(field.Stringify()),
-		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(int).FullName}")
+		_ => Expression.Constant(Field.Stringify()),
 	};
 
 	public Expression AsGuid(bool nullable) => AsStruct(nullable, node => Guid.Parse(node.Stringify()!));
@@ -39,11 +38,10 @@ internal class DataObject(object? constant, CreateExpressionOptions options)
 		JsonArray field => Expression.NewArrayInit(
 			nullable ? typeof(TStruct?) : typeof(TStruct),
 			field.Select(x => new DataObject(x, options).AsStruct(nullable, parser))),
-		JsonNode field => Expression.Constant(
-			parser(field),
+		_ => Expression.Constant(
+			parser(Field),
 			nullable ? typeof(TStruct?) : typeof(TStruct)),
-		_ => throw new InvalidOperationException($"Could not convert {Field?.GetType().FullName} to {typeof(TStruct).FullName}")
 	};
 }
 
-internal class DataArray<T>(object? constant, CreateExpressionOptions options) : DataObject(constant, options);
+internal class DataArray<T>(JsonNode? constant, CreateExpressionOptions options) : DataObject(constant, options);

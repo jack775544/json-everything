@@ -230,9 +230,6 @@ public static class ExpressionTypeUtilities
 
 					return Expression.NewArrayInit(arrayType, enumInitializers);
 				}
-				case string stringField:
-					enumValue = stringField;
-					break;
 				default:
 					enumValue = dataObject.Field.ToString()!;
 					break;
