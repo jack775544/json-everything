@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Json.Logic.Expressions.Utility;
 
@@ -51,6 +52,10 @@ public class RuleExpressionRegistry
 	{
 		options ??= _defaultOptions;
 		var expression = CreateExpressionInternal(rule, parameter, options);
+		if (typeof(DataObject).IsAssignableFrom(expression.Type))
+		{
+			expression = ExpressionTypeUtilities.Downcast([expression]).First();
+		}
 		return options.WrapConstants ? ConstantReplacer.Replace(expression) : expression;
 	}
 
@@ -65,10 +70,6 @@ public class RuleExpressionRegistry
 	{
 		var parameter = Expression.Parameter(typeof(object), "arg");
 		var expression = CreateExpression(rule, parameter, options ?? _defaultOptions);
-		if (expression.Type == typeof(DataObject))
-		{
-			expression = Expression.PropertyOrField(expression, nameof(DataObject.Field));
-		}
 		return Expression.Lambda<Func<object?, TReturn>>(expression, parameter);
 	}
 
@@ -84,10 +85,6 @@ public class RuleExpressionRegistry
 	{
 		var parameter = Expression.Parameter(typeof(TParam), "arg");
 		var expression = CreateExpression(rule, parameter, options ?? _defaultOptions);
-		if (expression.Type == typeof(DataObject))
-		{
-			expression = Expression.PropertyOrField(expression, nameof(DataObject.Field));
-		}
 		return Expression.Lambda<Func<TParam, TReturn>>(expression, parameter);
 	}
 }

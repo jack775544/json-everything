@@ -40,4 +40,18 @@ public class IfTests
 
 		Assert.AreEqual(3, expression.Compile()(null));
 	}
+
+	private record IfVarTestData(string Name);
+	
+	[Test]
+	public void IfVarReturnsTrue()
+	{
+		var rule = new IfRule(
+			new LooseEqualsRule(new VariableRule(nameof(IfVarTestData.Name)), "heyo"),
+			new VariableRule(nameof(IfVarTestData.Name)),
+			"ayo");
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<IfVarTestData, string>(rule);
+
+		Assert.AreEqual("heyo", expression.Compile()(new IfVarTestData("heyo")));
+	}
 }

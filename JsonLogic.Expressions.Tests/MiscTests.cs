@@ -307,4 +307,19 @@ public class MiscTests
 
 		Console.WriteLine(expression.ToString());
 	}
+
+	[TestCase(true)]
+	[TestCase(false)]
+	public void LiteralsRulesAreCorrect(bool wrapConstants)
+	{
+		var logic = "\"hello\"";
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule)!;
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule!, new CreateExpressionOptions
+		{
+			WrapConstants = wrapConstants,
+		});
+		var func = expression.Compile();
+
+		Assert.AreEqual("hello", func(null));
+	}
 }
