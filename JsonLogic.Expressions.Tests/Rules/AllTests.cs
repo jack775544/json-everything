@@ -13,7 +13,7 @@ public class AllTests
 			new MoreThanRule(new VariableRule(""), 0));
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]

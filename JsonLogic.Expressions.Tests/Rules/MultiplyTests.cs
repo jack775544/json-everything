@@ -10,7 +10,7 @@ public class MultiplyTests
 	{
 		var rule = new MultiplyRule(4, 5);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(20, expression.Compile()(null));
+		Assert.AreEqual(20, expression.Compile()());
 	}
 
 	[Test]
@@ -18,7 +18,7 @@ public class MultiplyTests
 	{
 		var rule = new MultiplyRule(4, 5, 5);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(100, expression.Compile()(null));
+		Assert.AreEqual(100, expression.Compile()());
 	}
 
 	[Test]
@@ -26,7 +26,7 @@ public class MultiplyTests
 	{
 		var rule = new MultiplyRule(4);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(4, expression.Compile()(null));
+		Assert.AreEqual(4, expression.Compile()());
 	}
 	
 	[Test]
@@ -34,6 +34,6 @@ public class MultiplyTests
 	{
 		var rule = new MultiplyRule(4, "5");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(20, expression.Compile()(null));
+		Assert.AreEqual(20, expression.Compile()());
 	}
 }

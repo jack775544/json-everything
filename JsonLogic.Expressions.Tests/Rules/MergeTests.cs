@@ -16,7 +16,7 @@ public class MergeTests
 			JsonNode.Parse("[4, 5, 6]"));
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<IEnumerable<decimal>>(rule);
-		Assert.That(expression.Compile()(null), Is.EquivalentTo(new decimal[] { 1, 2, 3, 4, 5, 6 }));
+		Assert.That(expression.Compile()(), Is.EquivalentTo(new decimal[] { 1, 2, 3, 4, 5, 6 }));
 	}
 
 	[Test]
@@ -25,7 +25,7 @@ public class MergeTests
 		var rule = new MergeRule(JsonNode.Parse("[1, 2, 3]"));
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<IEnumerable<decimal>>(rule);
-		Assert.That(expression.Compile()(null), Is.EquivalentTo(new decimal[] { 1, 2, 3 }));
+		Assert.That(expression.Compile()(), Is.EquivalentTo(new decimal[] { 1, 2, 3 }));
 	}
 
 	[Test]
@@ -37,7 +37,7 @@ public class MergeTests
 			7);
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<IEnumerable<decimal>>(rule);
-		Assert.That(expression.Compile()(null), Is.EquivalentTo(new decimal[] { 1, 2, 3, 4, 5, 6, 7 }));
+		Assert.That(expression.Compile()(), Is.EquivalentTo(new decimal[] { 1, 2, 3, 4, 5, 6, 7 }));
 	}
 	
 	[Test]
@@ -46,7 +46,7 @@ public class MergeTests
 		var rule = new MergeRule(7);
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<IEnumerable<decimal>>(rule);
-		Assert.That(expression.Compile()(null), Is.EquivalentTo(new decimal[] { 7 }));
+		Assert.That(expression.Compile()(), Is.EquivalentTo(new decimal[] { 7 }));
 	}
 
 	[Test]
@@ -55,6 +55,6 @@ public class MergeTests
 		var rule = new MergeRule();
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<IEnumerable<object>>(rule);
-		Assert.That(expression.Compile()(null), Is.EquivalentTo(Array.Empty<object>()));
+		Assert.That(expression.Compile()(), Is.EquivalentTo(Array.Empty<object>()));
 	}
 }

@@ -10,7 +10,7 @@ public class ModTests
 	{
 		var rule = new ModRule(4, 5);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(4, expression.Compile()(null));
+		Assert.AreEqual(4, expression.Compile()());
 	}
 
 	[Test]
@@ -18,6 +18,6 @@ public class ModTests
 	{
 		var rule = new ModRule(5, 4);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(1, expression.Compile()(null));
+		Assert.AreEqual(1, expression.Compile()());
 	}
 }

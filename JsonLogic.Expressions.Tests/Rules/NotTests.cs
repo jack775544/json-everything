@@ -11,7 +11,7 @@ public class NotTests
 	{
 		var rule = new NotRule(JsonNode.Parse("[]"));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -19,7 +19,7 @@ public class NotTests
 	{
 		var rule = new NotRule(JsonNode.Parse("[1]"));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -27,7 +27,7 @@ public class NotTests
 	{
 		var rule = new NotRule("");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -35,7 +35,7 @@ public class NotTests
 	{
 		var rule = new NotRule("foo");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -43,7 +43,7 @@ public class NotTests
 	{
 		var rule = new NotRule(0);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -51,7 +51,7 @@ public class NotTests
 	{
 		var rule = new NotRule(1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -59,7 +59,7 @@ public class NotTests
 	{
 		var rule = new NotRule(false);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -67,7 +67,7 @@ public class NotTests
 	{
 		var rule = new NotRule(true);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -75,6 +75,6 @@ public class NotTests
 	{
 		var rule = new NotRule(JsonNode.Parse("null"));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 }

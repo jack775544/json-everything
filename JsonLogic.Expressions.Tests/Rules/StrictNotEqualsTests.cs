@@ -10,7 +10,7 @@ public class StrictNotEqualsTests
 	{
 		var rule = new StrictNotEqualsRule(1, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -18,6 +18,6 @@ public class StrictNotEqualsTests
 	{
 		var rule = new StrictNotEqualsRule(1, 1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 }

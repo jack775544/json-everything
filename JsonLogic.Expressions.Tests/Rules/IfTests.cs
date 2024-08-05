@@ -11,7 +11,7 @@ public class IfTests
 		var rule = new IfRule(true, 1, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(1, expression.Compile()(null));
+		Assert.AreEqual(1, expression.Compile()());
 	}
 
 	[Test]
@@ -20,7 +20,7 @@ public class IfTests
 		var rule = new IfRule(false, 1, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(2, expression.Compile()(null));
+		Assert.AreEqual(2, expression.Compile()());
 	}
 
 	[Test]
@@ -29,7 +29,7 @@ public class IfTests
 		var rule = new IfRule(false, 1, true, 2, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(2, expression.Compile()(null));
+		Assert.AreEqual(2, expression.Compile()());
 	}
 
 	[Test]
@@ -38,7 +38,7 @@ public class IfTests
 		var rule = new IfRule(false, 1, false, 2, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(3, expression.Compile()(null));
+		Assert.AreEqual(3, expression.Compile()());
 	}
 
 	private record IfVarTestData(string Name);

@@ -11,7 +11,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -19,7 +19,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -27,7 +27,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(3, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -35,7 +35,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(false, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[TestCase("null", "2")]
@@ -44,7 +44,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(JsonNode.Parse(a), JsonNode.Parse(b));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 	
 	[Test]
@@ -52,7 +52,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, "2");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 	
 	[Test]
@@ -60,7 +60,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule("1", 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 	
 	[Test]
@@ -68,7 +68,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule("1", "2");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -76,7 +76,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 2, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -84,7 +84,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 1, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -92,7 +92,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 0, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -100,7 +100,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 3, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -108,7 +108,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 4, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -116,7 +116,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(false, 4, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -124,7 +124,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, false, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -132,7 +132,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 2, false);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 	
 	[Test]
@@ -140,7 +140,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule("1", "2", "3");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 	
 	[Test]
@@ -148,7 +148,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule("1", 2, 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 	
 	[Test]
@@ -156,7 +156,7 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, "2", 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 	
 	[Test]
@@ -164,6 +164,6 @@ public class LessThanTests
 	{
 		var rule = new LessThanRule(1, 2, "3");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 }

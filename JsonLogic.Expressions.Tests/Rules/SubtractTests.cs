@@ -10,7 +10,7 @@ public class SubtractTests
 	{
 		var rule = new SubtractRule(4, 5);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(-1, expression.Compile()(null));
+		Assert.AreEqual(-1, expression.Compile()());
 	}
 
 	[Test]
@@ -18,7 +18,7 @@ public class SubtractTests
 	{
 		var rule = new SubtractRule(4, "5");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(-1, expression.Compile()(null));
+		Assert.AreEqual(-1, expression.Compile()());
 	}
 
 	[Test]
@@ -26,7 +26,7 @@ public class SubtractTests
 	{
 		var rule = new SubtractRule(4);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(-4, expression.Compile()(null));
+		Assert.AreEqual(-4, expression.Compile()());
 	}
 	
 	[Test]
@@ -34,6 +34,6 @@ public class SubtractTests
 	{
 		var rule = new SubtractRule(4, 3, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(-1, expression.Compile()(null));
+		Assert.AreEqual(-1, expression.Compile()());
 	}
 }

@@ -10,7 +10,7 @@ public class SubstrTests
 	{
 		var rule = new SubstrRule("foobar", 3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.AreEqual("bar", expression.Compile()(null));
+		Assert.AreEqual("bar", expression.Compile()());
 	}
 
 	[Test]
@@ -18,6 +18,6 @@ public class SubstrTests
 	{
 		var rule = new SubstrRule("foobar", 3, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.AreEqual("ba", expression.Compile()(null));
+		Assert.AreEqual("ba", expression.Compile()());
 	}
 }

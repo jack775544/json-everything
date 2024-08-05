@@ -103,7 +103,7 @@ public class MiscTests
 		});
 		var func = expression.Compile();
 
-		Assert.AreEqual(true, func(null));
+		Assert.AreEqual(true, func());
 	}
 
 	[TestCase]
@@ -320,6 +320,6 @@ public class MiscTests
 		});
 		var func = expression.Compile();
 
-		Assert.AreEqual("hello", func(null));
+		Assert.AreEqual("hello", func());
 	}
 }

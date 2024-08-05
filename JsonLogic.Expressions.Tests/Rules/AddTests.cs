@@ -12,7 +12,7 @@ public class AddTests
 		var rule = new AddRule(4, 5);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(9, expression.Compile()(null));
+		Assert.AreEqual(9, expression.Compile()());
 	}
 
 	[Test]
@@ -31,7 +31,7 @@ public class AddTests
 		var rule = new AddRule(3.14);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(3.14, expression.Compile()(null));
+		Assert.AreEqual(3.14, expression.Compile()());
 	}
 
 	[Test]
@@ -40,7 +40,7 @@ public class AddTests
 		var rule = new AddRule("3.14");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(3.14, expression.Compile()(null));
+		Assert.AreEqual(3.14, expression.Compile()());
 	}
 
 	[Test]
@@ -49,7 +49,7 @@ public class AddTests
 		var rule = new AddRule(true);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(1, expression.Compile()(null));
+		Assert.AreEqual(1, expression.Compile()());
 	}
 
 	[Test]
@@ -58,7 +58,7 @@ public class AddTests
 		var rule = new AddRule(false);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(0, expression.Compile()(null));
+		Assert.AreEqual(0, expression.Compile()());
 	}
 
 	[Test]
@@ -67,6 +67,6 @@ public class AddTests
 		var rule = new AddRule(LiteralRule.Null);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(0, expression.Compile()(null));
+		Assert.AreEqual(0, expression.Compile()());
 	}
 }

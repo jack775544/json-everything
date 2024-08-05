@@ -11,6 +11,6 @@ public class DivideTests
 		var rule = new DivideRule(4, 5);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
 
-		Assert.AreEqual(.8m, expression.Compile()(null));
+		Assert.AreEqual(.8m, expression.Compile()());
 	}
 }

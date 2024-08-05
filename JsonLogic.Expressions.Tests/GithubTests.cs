@@ -15,7 +15,7 @@ public class GithubTests
 
 		Assert.IsInstanceOf<AddRule>(rule);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule!);
-		Assert.AreEqual(3, expression.Compile()(null));
+		Assert.AreEqual(3, expression.Compile()());
 	}
 
 	public class Issue383RelationshipToProposer

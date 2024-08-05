@@ -102,7 +102,7 @@ public class DivergenceTests
 	{
 		var rule = new StrictEqualsRule(1, "1");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	/// <summary>
@@ -113,7 +113,7 @@ public class DivergenceTests
 	{
 		var rule = new StrictNotEqualsRule(1, "1");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	/// <summary>
@@ -125,7 +125,7 @@ public class DivergenceTests
 	{
 		var rule = new SubstrRule("foobar", 10);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()(null));
+		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()());
 	}
 
 	/// <summary>
@@ -137,7 +137,7 @@ public class DivergenceTests
 	{
 		var rule = new SubstrRule("foobar", -2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()(null));
+		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()());
 	}
 
 	/// <summary>
@@ -149,7 +149,7 @@ public class DivergenceTests
 	{
 		var rule = new SubstrRule("foobar", -10);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()(null));
+		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()());
 	}
 
 	/// <summary>
@@ -161,7 +161,7 @@ public class DivergenceTests
 	{
 		var rule = new SubstrRule("foobar", 3, 5);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()(null));
+		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()());
 	}
 
 	/// <summary>
@@ -173,7 +173,7 @@ public class DivergenceTests
 	{
 		var rule = new SubstrRule("foobar", 2, -1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()(null));
+		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()());
 	}
 
 	/// <summary>
@@ -185,6 +185,6 @@ public class DivergenceTests
 	{
 		var rule = new SubstrRule("foobar", 2, -10);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()(null));
+		Assert.Throws<ArgumentOutOfRangeException>(() => expression.Compile()());
 	}
 }

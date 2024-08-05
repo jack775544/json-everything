@@ -10,7 +10,7 @@ public class MaxTests
 	{
 		var rule = new MaxRule(3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(3m, expression.Compile()(null));
+		Assert.AreEqual(3m, expression.Compile()());
 	}
 
 	[Test]
@@ -18,7 +18,7 @@ public class MaxTests
 	{
 		var rule = new MaxRule(3, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(3m, expression.Compile()(null));
+		Assert.AreEqual(3m, expression.Compile()());
 	}
 	
 	[Test]
@@ -26,6 +26,6 @@ public class MaxTests
 	{
 		var rule = new MaxRule(3, 2, 4);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(4m, expression.Compile()(null));
+		Assert.AreEqual(4m, expression.Compile()());
 	}
 }

@@ -13,7 +13,7 @@ public class InTests
 		var rule = new InRule("foo", "food");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 		
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -22,7 +22,7 @@ public class InTests
 		var rule = new InRule("foo", "bar");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -31,7 +31,7 @@ public class InTests
 		var rule = new InRule(4, "foo4bar");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -40,7 +40,7 @@ public class InTests
 		var rule = new InRule(true, "footruebar");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -49,7 +49,7 @@ public class InTests
 		var rule = new InRule(true, "foo");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -59,7 +59,7 @@ public class InTests
 		var rule = new InRule(2, array);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -69,7 +69,7 @@ public class InTests
 		var rule = new InRule(5, array);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -78,7 +78,7 @@ public class InTests
 		var rule = new InRule(1, LiteralRule.Null);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.Throws<NullReferenceException>(() => expression.Compile()(null));
+		Assert.Throws<NullReferenceException>(() => expression.Compile()());
 	}
 
 	[Test]
@@ -87,7 +87,7 @@ public class InTests
 		var rule = new InRule(1, false);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -96,7 +96,7 @@ public class InTests
 		var rule = new InRule(1, 4);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
 
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	private record InTestData<T>(T Data);

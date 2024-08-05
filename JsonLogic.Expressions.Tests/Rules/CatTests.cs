@@ -12,7 +12,7 @@ public class CatTests
 		var rule = new CatRule("foo", "bar");
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
 
-		Assert.AreEqual("foobar", expression.Compile()(null));
+		Assert.AreEqual("foobar", expression.Compile()());
 	}
 
 	[Test]
@@ -21,7 +21,7 @@ public class CatTests
 		var rule = new CatRule("foo", LiteralRule.Null);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
 
-		Assert.AreEqual("foo", expression.Compile()(null));
+		Assert.AreEqual("foo", expression.Compile()());
 	}
 
 	[Test]
@@ -30,7 +30,7 @@ public class CatTests
 		var rule = new CatRule("foo", 1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
 
-		Assert.AreEqual("foo1", expression.Compile()(null));
+		Assert.AreEqual("foo1", expression.Compile()());
 	}
 
 	[Test]
@@ -39,7 +39,7 @@ public class CatTests
 		var rule = new CatRule("foo", true);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
 
-		Assert.AreEqual("footrue", expression.Compile()(null));
+		Assert.AreEqual("footrue", expression.Compile()());
 	}
 
 	[Test]
@@ -49,6 +49,6 @@ public class CatTests
 		var rule = new CatRule("foo", array);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
 
-		Assert.AreEqual("foo1,2,3", expression.Compile()(null));
+		Assert.AreEqual("foo1,2,3", expression.Compile()());
 	}
 }

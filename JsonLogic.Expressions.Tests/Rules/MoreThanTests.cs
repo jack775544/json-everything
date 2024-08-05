@@ -10,7 +10,7 @@ public class MoreThanTests
 	{
 		var rule = new MoreThanRule(2, 1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -18,7 +18,7 @@ public class MoreThanTests
 	{
 		var rule = new MoreThanRule(1, 1);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -26,7 +26,7 @@ public class MoreThanTests
 	{
 		var rule = new MoreThanRule(1, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -34,7 +34,7 @@ public class MoreThanTests
 	{
 		var rule = new MoreThanRule(false, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -42,6 +42,6 @@ public class MoreThanTests
 	{
 		var rule = new MoreThanRule(LiteralRule.Null, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 }

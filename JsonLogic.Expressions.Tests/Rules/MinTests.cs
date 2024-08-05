@@ -10,7 +10,7 @@ public class MinTests
 	{
 		var rule = new MinRule(3);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(3m, expression.Compile()(null));
+		Assert.AreEqual(3m, expression.Compile()());
 	}
 
 	[Test]
@@ -18,7 +18,7 @@ public class MinTests
 	{
 		var rule = new MinRule(3, 2);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(2m, expression.Compile()(null));
+		Assert.AreEqual(2m, expression.Compile()());
 	}
 	
 	[Test]
@@ -26,6 +26,6 @@ public class MinTests
 	{
 		var rule = new MinRule(3, 2, 4);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(2m, expression.Compile()(null));
+		Assert.AreEqual(2m, expression.Compile()());
 	}
 }

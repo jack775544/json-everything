@@ -20,6 +20,6 @@ public class OrTests
 		var conditionRules = conditions.Select(x => new LiteralRule(x) as Rule).ToArray();
 		var rule = new OrRule(result, conditionRules);
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.AreEqual(result, expression.Compile()(null));
+		Assert.AreEqual(result, expression.Compile()());
 	}
 }

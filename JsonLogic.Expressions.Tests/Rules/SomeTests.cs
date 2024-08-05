@@ -12,7 +12,7 @@ public class SomeTests
 		var rule = new SomeRule(JsonNode.Parse("[1,2,3]"),
 			new StrictEqualsRule(new VariableRule(""), 2));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -21,6 +21,6 @@ public class SomeTests
 		var rule = new SomeRule(JsonNode.Parse("[1,2,3]"),
 			new StrictEqualsRule(new VariableRule(""), 0));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 }

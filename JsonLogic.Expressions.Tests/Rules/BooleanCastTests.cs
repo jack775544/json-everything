@@ -12,7 +12,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule(JsonNode.Parse("[]"));
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -21,7 +21,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule(JsonNode.Parse("[1]"));
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -30,7 +30,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule("");
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -39,7 +39,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule("foo");
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -48,7 +48,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule(0);
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -57,7 +57,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule(1);
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -66,7 +66,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule(false);
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 
 	[Test]
@@ -75,7 +75,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule(true);
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsTrue(expression.Compile()(null));
+		Assert.IsTrue(expression.Compile()());
 	}
 
 	[Test]
@@ -84,7 +84,7 @@ public class BooleanCastTests
 		var rule = new BooleanCastRule(JsonNode.Parse("null"));
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.IsFalse(expression.Compile()(null));
+		Assert.IsFalse(expression.Compile()());
 	}
 	
 	[TestCase("0", false)]
@@ -99,6 +99,6 @@ public class BooleanCastTests
 	{
 		var rule = new BooleanCastRule(JsonNode.Parse(text));
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<bool>(rule);
-		Assert.AreEqual(expected, expression.Compile()(null));
+		Assert.AreEqual(expected, expression.Compile()());
 	}
 }

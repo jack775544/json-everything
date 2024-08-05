@@ -15,7 +15,7 @@ public class ReduceTests
 			0m);
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<decimal>(rule);
-		Assert.AreEqual(6m, expression.Compile()(null));
+		Assert.AreEqual(6m, expression.Compile()());
 	}
 
 	[Test]
@@ -29,6 +29,6 @@ public class ReduceTests
 			"");
 
 		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<string>(rule);
-		Assert.AreEqual("abcdef", expression.Compile()(null));
+		Assert.AreEqual("abcdef", expression.Compile()());
 	}
 }
