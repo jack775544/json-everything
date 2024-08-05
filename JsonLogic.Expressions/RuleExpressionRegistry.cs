@@ -66,11 +66,11 @@ public class RuleExpressionRegistry
 	/// <param name="options">Options for creating the expression.</param>
 	/// <typeparam name="TReturn">The return type of the rule.</typeparam>
 	/// <returns>A lambda expression that expresses the logic of the provided rule.</returns>
-	public Expression<Func<object?, TReturn>> CreateRuleExpression<TReturn>(Rule rule, CreateExpressionOptions? options = null)
+	public Expression<Func<TReturn>> CreateRuleExpression<TReturn>(Rule rule, CreateExpressionOptions? options = null)
 	{
 		var parameter = Expression.Parameter(typeof(object), "arg");
 		var expression = CreateExpression(rule, parameter, options ?? _defaultOptions);
-		return Expression.Lambda<Func<object?, TReturn>>(expression, parameter);
+		return Expression.Lambda<Func<TReturn>>(expression);
 	}
 
 	/// <summary>
