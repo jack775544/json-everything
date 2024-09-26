@@ -113,4 +113,30 @@ public class VariableTests
 		Assert.AreEqual(data.Inner.Foo, result.Foo);
 		Assert.AreEqual(data.Inner.Bar, result.Bar);
 	}
+
+	[Test]
+	public void CountOnCollectionReturnsSize()
+	{
+		var rule = new VariableRule("Count");
+		List<int> data = [1, 2, 3];
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<List<int>, int>(rule);
+		var result = expression.Compile()(data);
+
+		Assert.AreEqual(3, result);
+	}
+
+	private class CollectionContainer
+	{
+		public List<int> List { get; } = [1, 2, 3, 4];
+	}
+
+	[Test]
+	public void CountOnNestedCollectionReturnsSize()
+	{
+		var rule = new VariableRule("List.Count");
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<CollectionContainer, int>(rule);
+		var result = expression.Compile()(new CollectionContainer());
+
+		Assert.AreEqual(4, result);
+	}
 }

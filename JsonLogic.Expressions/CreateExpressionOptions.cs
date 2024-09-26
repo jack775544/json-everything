@@ -5,7 +5,7 @@ namespace Json.Logic.Expressions;
 /// <summary>
 /// Options for the create expression logic method.
 /// </summary>
-public class CreateExpressionOptions
+public record CreateExpressionOptions
 {
 	/// <summary>
 	/// If set to true then constant values will be wrapped in an object and the value will be fetched from this wrapper object.

@@ -62,11 +62,9 @@ public class VariableRuleExpression : RuleExpression<VariableRule>
 
 	private static Expression GetPropertyOrArrayMember(Expression expression, string path)
 	{
-		if (expression.Type.IsCollectionType())
+		if (expression.Type.IsCollectionType() && int.TryParse(path, out var index))
 		{
-			return int.TryParse(path, out var index)
-				? expression.GetCollectionItem(index)
-				: Expression.Constant(null);
+			return expression.GetCollectionItem(index);
 		}
 
 		try
