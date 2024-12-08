@@ -18,6 +18,11 @@ internal class TestData
 	public DateOnly DateOnlyField { get; set; }
 }
 
+file class TestData2
+{
+	public List<TestData>? Data { get; set; }
+}
+
 public class MiscTests
 {
 	[Test]
@@ -321,5 +326,33 @@ public class MiscTests
 		var func = expression.Compile();
 
 		Assert.AreEqual("hello", func());
+	}
+
+	[Test]
+	public void SomeBoolLiteralIsCorrect()
+	{
+		// language=JSON
+		var logic = """
+			{
+				"some": [
+					{ "var": "data" },
+					true
+				]
+			}
+			""";
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule)!;
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<TestData2, bool>(rule);
+
+		var func = expression.Compile();
+
+		List<TestData2> data =
+		[
+			new TestData2 { Data = [] },
+			new TestData2 { Data = [ new TestData() ] },
+			new TestData2 { Data = [ new TestData(), new TestData() ] },
+		];
+
+		var count = data.Where(func).Count();
+		Assert.AreEqual(2, count);
 	}
 }

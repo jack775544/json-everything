@@ -13,7 +13,7 @@ public class FilterRuleExpression : RuleExpression<FilterRule>
 {
 	private static readonly MethodInfo _whereMethod = typeof(Enumerable)
 		.GetMethods()
-		.Where(x => x.Name == "Where")
+		.Where(x => x.Name == nameof(Enumerable.Where))
 		.Single(x => x.GetParameters().Last().ParameterType.GetGenericArguments().Length == 2);
 
 	/// <inheritdoc />
@@ -23,15 +23,16 @@ public class FilterRuleExpression : RuleExpression<FilterRule>
 
 		if (!LogicTypeExtensions.TryGetGenericCollectionType(input.Type, out var type))
 		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
+			throw new JsonLogicException("Non collection passed when the expecting collection in filter rule");
 		}
 
 		var param = Expression.Parameter(type, type.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
+		var normalisedBody = ExpressionTypeUtilities.Downcast([body]).First();
 		var args = ExpressionTypeUtilities.Downcast(new[] { input }, type);
 		return Expression.Call(
 			_whereMethod.MakeGenericMethod(type),
 			args[0],
-			Expression.Lambda(body, param));
+			Expression.Lambda(normalisedBody, param));
 	}
 }

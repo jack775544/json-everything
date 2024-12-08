@@ -13,7 +13,7 @@ public class NoneRuleExpression : RuleExpression<NoneRule>
 {
 	private static readonly MethodInfo _anyMethod = typeof(Enumerable)
 		.GetMethods()
-		.Where(x => x.Name == "Any")
+		.Where(x => x.Name == nameof(Enumerable.Any))
 		.Single(x => x.GetParameters().Length == 2);
 
 	/// <inheritdoc />
@@ -28,10 +28,11 @@ public class NoneRuleExpression : RuleExpression<NoneRule>
 
 		var param = Expression.Parameter(type, type.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
-		var args = ExpressionTypeUtilities.Downcast(new[] { input }, type);
+		var normalisedBody = ExpressionTypeUtilities.Downcast([body], typeof(bool)).First();
+		var args = ExpressionTypeUtilities.Downcast([input], type);
 		return Expression.Not(Expression.Call(
 			_anyMethod.MakeGenericMethod(type),
 			args[0],
-			Expression.Lambda(body, param)));
+			Expression.Lambda(normalisedBody, param)));
 	}
 }

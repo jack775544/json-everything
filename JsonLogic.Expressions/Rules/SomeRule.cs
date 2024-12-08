@@ -13,7 +13,7 @@ public class SomeRuleExpression : RuleExpression<SomeRule>
 {
 	private static readonly MethodInfo _anyMethod = typeof(Enumerable)
 		.GetMethods()
-		.Where(x => x.Name == "Any")
+		.Where(x => x.Name == nameof(Enumerable.Any))
 		.Single(x => x.GetParameters().Length == 2);
 
 	/// <inheritdoc />
@@ -23,16 +23,17 @@ public class SomeRuleExpression : RuleExpression<SomeRule>
 
 		if (!LogicTypeExtensions.TryGetGenericCollectionType(input.Type, out var type))
 		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
+			throw new JsonLogicException("Non collection passed when the expecting collection in some rule");
 		}
 
 		var param = Expression.Parameter(type, type.Name);
 
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
-		var args = ExpressionTypeUtilities.Downcast(new[] { input }, type);
+		var normalisedBody = ExpressionTypeUtilities.Downcast([body], typeof(bool)).First();
+		var args = ExpressionTypeUtilities.Downcast([input], type);
 		return Expression.Call(
 			_anyMethod.MakeGenericMethod(type),
 			args[0],
-			Expression.Lambda(body, param));
+			Expression.Lambda(normalisedBody, param));
 	}
 }

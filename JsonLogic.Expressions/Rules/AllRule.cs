@@ -11,7 +11,8 @@ namespace Json.Logic.Expressions.Rules;
 /// </summary>
 public class AllRuleExpression : RuleExpression<AllRule>
 {
-	private static readonly MethodInfo _allMethod = typeof(Enumerable).GetMethod("All")!;
+	private static readonly MethodInfo _allMethod = typeof(Enumerable)
+		.GetMethod(nameof(Enumerable.All))!;
 
 	/// <inheritdoc />
 	public override Expression CreateExpression(AllRule rule, RuleExpressionRegistry registry, Expression parameter, CreateExpressionOptions options)
@@ -20,17 +21,17 @@ public class AllRuleExpression : RuleExpression<AllRule>
 
 		if (!LogicTypeExtensions.TryGetGenericCollectionType(input.Type, out var paramType))
 		{
-			throw new JsonLogicException("Non collection passed when the expecting collection in none rule");
+			throw new JsonLogicException("Non collection passed when the expecting collection in all rule");
 		}
 
 		var param = Expression.Parameter(paramType, paramType.Name);
 		var body = registry.CreateExpressionInternal(rule.Rule, param, options);
+		var normalisedBody = ExpressionTypeUtilities.Downcast([body], typeof(bool)).First();
+		var args = ExpressionTypeUtilities.Downcast([input], paramType);
 
-		var args = ExpressionTypeUtilities.Downcast(new[] { input }, paramType);
-		
 		return Expression.Call(
 			_allMethod.MakeGenericMethod(paramType),
 			args[0],
-			Expression.Lambda(body, param));
+			Expression.Lambda(normalisedBody, param));
 	}
 }
