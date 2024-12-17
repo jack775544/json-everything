@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Json.Logic.Rules;
@@ -74,9 +76,16 @@ file class TestDatabase : IAsyncDisposable
 
 public class EfCoreTests
 {
+	private static MethodInfo EfConstantFunc = typeof(EF)
+		.GetMethods(BindingFlags.Public | BindingFlags.Static)
+		.Single(x => x.Name == nameof(EF.Parameter));
+	
 	private static readonly CreateExpressionOptions _options = new()
 	{
 		WrapConstants = true,
+		ConstantWrapper = expression => Expression.Call(
+			EfConstantFunc.MakeGenericMethod(expression.Type),
+			expression)
 	};
 
 	[Test]

@@ -189,11 +189,6 @@ public static class ExpressionTypeUtilities
 		return mostCommonType;
 	}
 
-	private class NullableBox<T>(T? field) where T : struct
-	{
-		public T? Field { get; set; } = field;
-	}
-
 	internal static Expression DataObjectToExpression(DataObject dataObject, bool nullable, Type convertTo)
 	{
 		var isArray = false;
@@ -238,7 +233,9 @@ public static class ExpressionTypeUtilities
 			return CreateEnumExpression(isNullable, convertTo, enumValue);
 		}
 
-		if (convertTo != typeof(string) && typeof(IEnumerable).IsAssignableFrom(convertTo) && LogicTypeExtensions.TryGetGenericCollectionType(convertTo, out var tempConvertTo))
+		if (convertTo != typeof(string)
+			&& typeof(IEnumerable).IsAssignableFrom(convertTo)
+			&& LogicTypeExtensions.TryGetGenericCollectionType(convertTo, out var tempConvertTo))
 		{
 			convertTo = tempConvertTo;
 		}
@@ -259,11 +256,23 @@ public static class ExpressionTypeUtilities
 			: result;
 	}
 
-	private static Expression CreateEnumExpression(bool isNullable, Type convertTo, string? enumValue) => !isNullable
-		? Expression.Constant(Enum.Parse(convertTo, enumValue!))
-		: Expression.PropertyOrField(Expression.Constant(typeof(NullableBox<>)
-			.MakeGenericType(convertTo)
-			.GetConstructors()
-			.Single()
-			.Invoke([enumValue == null ? null : Enum.Parse(convertTo, enumValue)])), nameof(NullableBox<int>.Field));
+	private static Expression CreateEnumExpression(bool isNullable, Type convertTo, string? enumValue)
+	{
+		// If we need to create a not nullable enum then just parse it and return a constant
+		// If it does not parse, the only valid thing to do is explode.
+		if (!isNullable)
+		{
+			return Expression.Constant(Enum.Parse(convertTo, enumValue!));
+		}
+
+		if (enumValue == null)
+		{
+			return Expression.Default(typeof(Nullable<>).MakeGenericType(convertTo));
+		}
+
+		// To make a nullable enum, the easiest way is to create a constant enum and then cast it.
+		return Expression.Convert(
+			Expression.Constant(Enum.Parse(convertTo, enumValue)),
+			typeof(Nullable<>).MakeGenericType(convertTo));
+	}
 }

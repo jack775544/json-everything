@@ -34,7 +34,9 @@ internal class DataObject(JsonNode? constant, CreateExpressionOptions options)
 
 	private Expression AsStruct<TStruct>(bool nullable, Func<JsonNode, TStruct> parser) where TStruct : struct => Field switch
 	{
-		null => nullable ? Expression.Constant(null, typeof(TStruct?)) : throw new JsonLogicException($"Null found when expecting non nullable {typeof(TStruct).Name}"),
+		null => nullable
+			? Expression.Constant(null, typeof(TStruct?))
+			: throw new JsonLogicException($"Null found when expecting non nullable {typeof(TStruct).Name}"),
 		JsonArray field => Expression.NewArrayInit(
 			nullable ? typeof(TStruct?) : typeof(TStruct),
 			field.Select(x => new DataObject(x, options).AsStruct(nullable, parser))),

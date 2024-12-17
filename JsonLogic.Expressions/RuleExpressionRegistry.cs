@@ -56,7 +56,7 @@ public class RuleExpressionRegistry
 		{
 			expression = ExpressionTypeUtilities.Downcast([expression]).First();
 		}
-		return options.WrapConstants ? ConstantReplacer.Replace(expression) : expression;
+		return options.WrapConstants ? ConstantReplacer.Replace(expression, options.ConstantWrapper) : expression;
 	}
 
 	/// <summary>

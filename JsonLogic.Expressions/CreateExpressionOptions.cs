@@ -1,4 +1,6 @@
+using System;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace Json.Logic.Expressions;
 
@@ -12,6 +14,11 @@ public record CreateExpressionOptions
 	/// This causes EF Core to use SQL variables when generating SQL.
 	/// </summary>
 	public bool WrapConstants { get; set; }
+
+	/// <summary>
+	/// Optional function that will be used to wrap constants if <see cref="WrapConstants"/> is enabled.
+	/// </summary>
+	public Func<Expression, Expression>? ConstantWrapper { get; set; }
 
 	/// <summary>
 	/// Culture info for parse operations.
