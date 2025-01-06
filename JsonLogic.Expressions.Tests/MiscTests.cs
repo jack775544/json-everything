@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.Json;
@@ -354,5 +355,22 @@ public class MiscTests
 
 		var count = data.Where(func).Count();
 		Assert.AreEqual(2, count);
+	}
+
+	[TestCase("true", true, true)]
+	[TestCase("true", true, false)]
+	[TestCase("false", false, true)]
+	[TestCase("false", false, false)]
+	public void BoolLiteralIsCorrect(string logic, bool hasData, bool wrapConstants)
+	{
+		var rule = JsonSerializer.Deserialize(logic, TestDataSerializerContext.Default.Rule)!;
+		var expression = RuleExpressionRegistry.Current.CreateRuleExpression<int, bool>(rule, new CreateExpressionOptions
+		{
+			WrapConstants = wrapConstants,
+		});
+
+		var func = expression.Compile();
+
+		Assert.AreEqual(hasData, Enumerable.Range(1, 10).Any(func));
 	}
 }
